@@ -1,0 +1,6 @@
+*.o
+*.hi
+*.sw[op]
+out/
+*.hi-boot
+*.o-boot
