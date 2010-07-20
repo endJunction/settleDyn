@@ -15,8 +15,8 @@ Author(s)  : Dmitrij Yu. Naumov
 Description
 -----------
 
-"Settle3D" is a sedimentation process simulator.  It is capable to generate
-loose-sand--like structures from given particle forms and statistical
+"Settle3D" is a sedimentation process simulator.  It is capable of generating
+loose sand-like structures from given particle forms and statistical
 distributions.
 
 This software is a complete rewrite of the settle3D program written by Guido
@@ -33,10 +33,10 @@ cannot be simulated with settle3D.
 
 Simulation process starts with definition of grain shapes and grain size
 distributions. The shapes are polyhedral descriptions read from files in
-Geomview Object File Format (.off). For now only convex shapes are allowed.
+Geomview Object File Format (.off). For now, only convex shapes are allowed.
 
-After simulation is finished the grains in their current positions are written
-to specified directory, again in the .off format.
+After the simulation is finished, the grains in their current positions are
+written to specified directory, again in the .off format.
 
 
 Requirements
