@@ -1,0 +1,35 @@
+
+Settle3D is a Haskell program, which provides a command line interface, and it
+uses the Bullet Physics Library for the collision detection.
+
+__Outline__  To compile settle3D one needs a Haskell compiler together with
+libraries.  These are for example packaged in Haskell Plattform found under
+http://hackage.haskell.org/platform.  The current version is tested with Glasgow
+Haskell Compiler version 6.12.  The extra libraries needed by settle3D are
+listed in the cabal configuration file and will be installed automatically by
+the Haskell's package manager cabal.
+
+The Bullet Physics Library (http://www.bulletphysics.org) must be installed
+before compiling the Haskell sources. Many Linux distributions have already a
+precompiled package; alternatively one compiles it following instructions on the
+Bullet's web site.
+
+The Haskell Plattform is available besides Linux also for Windows and Mac OS.
+After installing Bullet Physics Library the installation procedure is the same
+with only difference in path names.
+
+__Step by step intsruction__:
+ -    Install Bullet Physics Library either as package in your linux
+      distribution or build it from sources.
+ -    Install Haskell Plattform.
+ -    In the top directory of settle3D (containing the settle3D.cabal file) run
+      'cabal install'. The missing libraries required by settle3D should be
+      downloaded and installed automatically by cabal.
+ -    At the end of compilation there will be a line saying where the executable
+      is installed to, usually
+      "Installing executable(s) in /home/user/.cabal/bin".
+ -    A short test 'settle3D -p data/sphere.off -n 10 -o /tmp/test' should
+      generate a new directory /tmp/test containing resulting grain files in
+      .off file format and a statistics.txt file.
+
+
