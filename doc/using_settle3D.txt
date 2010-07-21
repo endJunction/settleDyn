@@ -1,0 +1,101 @@
+
+Introduction
+------------
+
+The simulation process can be described as "throwing grains in a sandbox."
+Only grains can be controlled by command line arguments, while the sandbox
+dimensions are fix.  This does not reduce the diversity of porous media, which
+can be generated.
+
+__The sandbox__ is constrained by ground plane with top at z = 0 (z is the
+vertical coordinate) centered in the origin.  The four walls of the sandbox are
+100 units high and placed 7 units to each side of origin.  The resulting
+simulation volume is -7 to 7 in x and y directions and from 0 to maximum of 100
+units in the vertical.  All units are arbitrary, one can always rescale the
+resulting porous media.
+
+When further processing the porous medium one would usually like to avoid any
+boundary effects (equally placed grains along the walls and on the ground
+plane), and would select only grains contained e.g. in 10x10x10 cube centered at
+(0, 0, 10).  This is the reason why the walls' positions were choosen as above.
+The sandbox dimensions cannot be altered by command line arguments.
+
+__Grain generation__ is controlled by grains' shapes, their grain size
+distribution and "throw in" placement.
+
+_The grain shapes_ must be convex polyhedra described in Geomview Object File
+Format (.off). The shapes to be used in the simulation are specified by
+the '-p filename.off' command line argument. There can be arbitrary many input
+shapes but at least one is required, because there is no "default" shape.
+
+Using multiple grain shapes allows to control their fractions in the resulting
+porous media. In the simulation it is uniformly drawn from all available shapes.
+Specifying two spheres and one cube as input would generate 2/3 of spheres and
+1/3 of cubes approximately.
+
+_Grain size distributions_ are usually given in mass per cent. Most of the grain
+size distributions of sands can be approximated with Weibull distribution (see
+your favorite statistics book on this subject) which depends on two
+coefficients, the slope and mean. We also give a lower bound for grains' sizes
+and this results in shifted Weibull distribution.
+
+The command line arguments are '-l', '-m' and '-k' for the mean, minimum and
+slope respectively.  To create grains with minimum size 0.5 and mean 1 give
+'-l 1 -m 0.5' as command line arguments.
+
+This is all to kind of grains constructed in the simulation. The rest of of the
+introduction covers the grain placement and the remaining command line
+arguments, and can be skipped in the first reading.
+
+_Placement_  The grains are generated in a square with dimensions -b to b in x
+and y directions.  '-b' is the corresponding command line argument.  The height
+of the generated grains is computed from the height of the already settled
+grains plus offset.  The offset is specified by '--offset' argument and should
+be a non-negative value.  The height of the settled grains is maximum height of
+non-moving grains', where there is a velocity threshold controlled by '-t'
+argument.
+
+_Generation rate_  The velocity threshold argument also controlls when new
+grains are generated.  Together with '-m' argument, which specifies the maximum
+number of moving grains, the generation rate can be controlled.
+
+Grain generation stopps when maximum number of grains is reached, set by the
+'-n' argument. Or, when maximum height of settled grains is reached. This is
+controlled by the '-h' command line argument.
+
+
+__Finishing simulation__  The simulation finishes when all grains are settled
+down.  Then it saves all grains in their current position to the 'out/'
+directory by default. One can specify another output directory with '-o path'
+argument.
+
+Alternatively one can specify number of simulation steps with '-s' argument.
+
+
+Examples
+--------
+
+The following command line arguments describe common scenarios.
+
+*One grain shape (prototype.off) with constant size 1.23.*  Setting the grain
+size minimum and mean to same values result in only one grain size.
+
+> settle3D -p prototype.off -l 1.23 -m 1.23
+
+*One grain shape with mean 1.0 and minimum 0.5*  Let the form parameter k of the
+Weibull distribution be 3.0 (default value), then the mean of the non-shifted
+distribution is L * Gamma(1 + 1/k) ~= L * 0.89338 and of the shifted it is
+minimum + L * 0.89338 = 0.5 + L * 0.89338, which should be 1.0,
+i.e. L ~= 0.55967 and l = L + minimum = 1.05967.
+
+> settle3D -p prototype.off -l 1.05967 -m 0.5
+
+The variance of the non-shifted Weibull distribution is
+sigma^2 = L^2 (Gamma(1+2/k) - Gamma^2(1+1/k)). In this example it is
+sigma ~= 0.18
+
+*Two shapes (s1.off, s2.off) of constant size 1.0 containing 25% of first and
+75% of the second shape.* Specify the second shape three times.
+
+> settle3D -p s1.off -p s2.off -p s2.off -p s2.off -m 1 -l 1
+
