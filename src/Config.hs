@@ -1,0 +1,100 @@
+{- This file is part of "settle3D" software.
+
+Copyright (C) 2009, 2010
+          Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
+
+"Settle3D" is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+"Settle3D" is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+"settle3D".  If not, see <http://www.gnu.org/licenses/>.
+
+
+Author: Dmitrij Yu. Naumov
+
+-}
+
+
+module Config (
+      generateGrainsOffset
+    , grainsGenerationBox
+    , grainsSizeMean
+    , grainsSizeMin
+    , grainsSizeSlope
+    , maxGrainsHeight
+    , maxMovingGrains
+    , maxNumberGrains
+    , maxSimulationSteps
+    , movingThreshold
+    , outputDirectory
+    , prototypeFiles
+    , saveEveryStep
+    , setOptions, getOptions
+    , Options(..)
+    ) where
+
+import Data.IORef
+import System.IO.Unsafe
+import Foreign.C.Types (CFloat)
+
+data Options = Options {
+      _generateGrainsOffset :: CFloat
+    , _grainsGenerationBox :: CFloat -- for random x,z position
+    , _grainsSizeMean :: CFloat
+    , _grainsSizeMin :: CFloat
+    , _grainsSizeSlope :: CFloat
+    , _maxGrainsHeight :: CFloat
+    , _maxMovingGrains :: Int
+    , _maxNumberGrains :: Int
+    , _maxSimulationSteps :: Int
+    , _movingThreshold :: CFloat
+    , _outputDirectory :: String
+    , _prototypeFiles :: [FilePath]
+    , _saveEveryStep :: Bool
+    } deriving Show
+
+getOptions :: IO Options
+getOptions = readIORef options
+
+setOptions :: Options -> IO ()
+setOptions = writeIORef options
+
+{-# NOINLINE options #-}
+options :: IORef Options
+options = unsafePerformIO $ newIORef defaultOptions
+
+defaultOptions = Options {
+      _generateGrainsOffset = 10
+    , _grainsGenerationBox = 5
+    , _grainsSizeMean = 2.0
+    , _grainsSizeMin = 1.9
+    , _grainsSizeSlope = 3.0
+    , _maxGrainsHeight = 17
+    , _maxMovingGrains = 100
+    , _maxNumberGrains = 10000
+    , _maxSimulationSteps = 10000
+    , _movingThreshold = 1e-4
+    , _outputDirectory = "out"
+    , _prototypeFiles = []
+    , _saveEveryStep = False
+    }
+
+generateGrainsOffset = _generateGrainsOffset $ unsafePerformIO getOptions
+grainsGenerationBox = _grainsGenerationBox $ unsafePerformIO getOptions
+grainsSizeMean = _grainsSizeMean $ unsafePerformIO getOptions
+grainsSizeMin = _grainsSizeMin $ unsafePerformIO getOptions
+grainsSizeSlope = _grainsSizeSlope $ unsafePerformIO getOptions
+maxGrainsHeight = _maxGrainsHeight $ unsafePerformIO getOptions
+maxMovingGrains = _maxMovingGrains $ unsafePerformIO getOptions
+maxNumberGrains = _maxNumberGrains $ unsafePerformIO getOptions
+maxSimulationSteps = _maxSimulationSteps $ unsafePerformIO getOptions
+movingThreshold = _movingThreshold $ unsafePerformIO getOptions
+outputDirectory = _outputDirectory $ unsafePerformIO getOptions
+prototypeFiles = _prototypeFiles $ unsafePerformIO getOptions
+saveEveryStep = _saveEveryStep $ unsafePerformIO getOptions
