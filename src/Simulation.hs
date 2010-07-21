@@ -166,7 +166,8 @@ stepSimulation s dt = do
         && nMovingGrains < Config.maxMovingGrains)
         $ createNewGrain s (height+Config.generateGrainsOffset + 2*Config.grainsSizeMean)
 
-    print $ "Grains total/moving/maxV/height: " ++
+    when (Config.verbose) $ print $
+        "Grains total/moving/maxV/height: " ++
         show totalGrains ++ "/" ++
         show nMovingGrains ++ "/" ++
         show (if null norms then 0.0 else maximum norms) ++ "/" ++
@@ -222,7 +223,7 @@ createNewGrain state height = do
 
     spaceIsFree <- isSpaceGrainFree ([x, height, z], s*1.1) state
     -- skip grain generation to prevent grain overlap
-    if spaceIsFree
+    when (Config.verbose) $ if spaceIsFree
         then print "OK -- free space"
         else print "SKIP this one."
 
@@ -249,7 +250,8 @@ createNewGrainAt state ((x, height, z), s) = do
 
     let g = Grain (ps, ts)
 
-    print $ "grain's size/volume are " ++ show (size g) ++ "/" ++ show (volume g)
+    when (Config.verbose) $ print $
+        "grain's size/volume are " ++ show (size g) ++ "/" ++ show (volume g)
 
     prependGrain state g b
 

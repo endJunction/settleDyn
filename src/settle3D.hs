@@ -31,7 +31,7 @@ import Control.Monad (replicateM_, when)
 import Grains (readGrainPrototype)
 import Simulation (State, makeState, stepSimulation, saveGrains, writeGrainsStatistics, writePovFiles)
 
-import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, saveEveryStep)
+import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
 import qualified CLI
 
 import OffWriter
@@ -50,7 +50,14 @@ main = do
 
     c <- Config.getOptions
     getArgs >>= CLI.parseOptions c >>= Config.setOptions
-    Config.getOptions >>= print
+
+    -- Show help message and exit
+    when (Config.showHelp) $
+        putStrLn (CLI.helpMessage)
+            >> exitWith ExitSuccess
+
+    when (Config.verbose) $
+        Config.getOptions >>= print
 
     -- Read grain shapes from prototype files.
     when (null Config.prototypeFiles) $

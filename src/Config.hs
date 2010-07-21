@@ -34,6 +34,8 @@ module Config (
     , movingThreshold
     , outputDirectory
     , prototypeFiles
+    , verbose
+    , showHelp
     , saveEveryStep
     , setOptions, getOptions
     , Options(..)
@@ -56,6 +58,8 @@ data Options = Options {
     , _movingThreshold :: CFloat
     , _outputDirectory :: String
     , _prototypeFiles :: [FilePath]
+    , _verbose :: Bool
+    , _showHelp :: Bool
     , _saveEveryStep :: Bool
     } deriving Show
 
@@ -82,6 +86,8 @@ defaultOptions = Options {
     , _movingThreshold = 1e-4
     , _outputDirectory = "out"
     , _prototypeFiles = []
+    , _verbose = False
+    , _showHelp = False
     , _saveEveryStep = False
     }
 
@@ -97,4 +103,6 @@ maxSimulationSteps = _maxSimulationSteps $ unsafePerformIO getOptions
 movingThreshold = _movingThreshold $ unsafePerformIO getOptions
 outputDirectory = _outputDirectory $ unsafePerformIO getOptions
 prototypeFiles = _prototypeFiles $ unsafePerformIO getOptions
+verbose = _verbose $ unsafePerformIO getOptions
+showHelp = _showHelp $ unsafePerformIO getOptions
 saveEveryStep = _saveEveryStep $ unsafePerformIO getOptions
