@@ -1,0 +1,39 @@
+Name:                settle3D
+Version:             0.1
+
+Synopsis:            Sedimentation process simulator for generation of loose
+                     sand-like structures.
+Description:         Settle3D is a sedimentation process simulator.  It is
+                     capable of generating loose sand-like structures from given
+                     particle forms and statistical distributions.
+  
+Homepage:            git://github.com/endJunction/settle3D.git
+License:             GPL-3
+License-file:        LICENSE
+Author:              Dmitrij Yu. Naumov
+Maintainer:          naumov@gfz-potsdam.de
+Copyright:           (C) 2009, 2010 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
+
+Category:            Scientific Simulation
+Build-type:          Simple
+Cabal-version:       >=1.4
+
+Extra-source-files:  README, data/*.off
+
+
+
+Executable settle3D
+    HS-source-dirs:     src
+    Main-is:            settle3D.hs
+  
+    Build-depends:        array
+                        , base >= 4 && < 5
+                        , bullet
+                        , directory
+                        , parsec >= 3 && < 4
+                        , random
+                        , vector-space
+  
+    GHC-Options:        -Wall -funbox-strict-fields
+    GHC-Prof-Options:   -Wall -auto-all -caf-all
+
