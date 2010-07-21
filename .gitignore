@@ -4,3 +4,4 @@
 out/
 *.hi-boot
 *.o-boot
+dist/
