@@ -42,7 +42,7 @@ written to specified directory, again in the .off format.
 Requirements
 ------------
 
-This code is written is Haskell and uses the Bullet Game Physics Engine Library
+This code is written in Haskell and uses the Bullet Game Physics Engine Library
 for collision detection. In order to compile this program you will need:
  - Bullet Physics Library (http://bulletphysics.org)
  - Haskell e.g. Glasgow Haskell Compiler (GHC)
