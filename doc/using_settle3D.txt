@@ -56,7 +56,7 @@ non-moving grains', where there is a velocity threshold controlled by '-t'
 argument.
 
 _Generation rate_  The velocity threshold argument also controlls when new
-grains are generated.  Together with '-m' argument, which specifies the maximum
+grains are generated.  Together with '-n' argument, which specifies the maximum
 number of moving grains, the generation rate can be controlled.
 
 Grain generation stopps when maximum number of grains is reached, set by the
