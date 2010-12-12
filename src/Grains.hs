@@ -102,6 +102,8 @@ readGrainPrototype file =
         listToPoints :: [Double] -> Point
         listToPoints = listToTriples . map realToFrac
 
+-- Size of a grain is defined by second shortest edge length of its bounding
+-- box.
 size :: Grain -> CFloat
 size (Grain (ps, _)) = sizePoints ps
 
