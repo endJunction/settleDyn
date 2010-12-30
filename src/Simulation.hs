@@ -261,12 +261,12 @@ createNewGrainAt state ((x, height, z), s) = do
 -- parameters:
 --  - k is the form parameter,
 --  - l is the magnitude and
---  - c is the shift parameter.
+--  - m is the shift parameter.
 
 icfdWeibull :: (RealFloat a) => (a, a, a) -> a -> a
-icfdWeibull (k, l, c) y
-    | y <= 0 = c
-    | otherwise = c + l * abs (log y)**(1/k)
+icfdWeibull (k, l, m) y
+    | y <= 0 = m
+    | otherwise = m + (l - m) * abs (log y)**(1/k)
 
 
 -- Usually the grain size distribution is given in mass-per cent and not in
@@ -278,7 +278,7 @@ generateGrainSize :: IO CFloat
 generateGrainSize =
     let k = Config.grainsSizeSlope
         m = Config.grainsSizeMin
-        l = Config.grainsSizeMean - m
+        l = Config.grainsSizeMean
     in
     fmap (icfdWeibull (k, l, m)) randomIO
 
