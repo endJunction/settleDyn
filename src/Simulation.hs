@@ -297,8 +297,13 @@ generateGrainSize =
     let k = Config.grainsSizeSlope
         m = Config.grainsSizeMin
         l = Config.grainsSizeMean
+        g = case Config.grainsSizeGenerator of
+            "univariate" -> univariate
+            "bivariate" -> bivariate
+            "weibull" -> icfdWeibull
+            _ -> error "Unknown random number distribution"
     in
-    fmap (icfdWeibull (k, l, m)) randomIO
+    fmap (g (k, l, m)) randomIO
 
 -------------------------------------------------------------------------------
 

@@ -27,6 +27,7 @@ module Config (
     , grainsSizeMean
     , grainsSizeMin
     , grainsSizeSlope
+    , grainsSizeGenerator
     , maxGrainsHeight
     , maxMovingGrains
     , maxNumberGrains
@@ -51,6 +52,7 @@ data Options = Options {
     , _grainsSizeMean :: CFloat
     , _grainsSizeMin :: CFloat
     , _grainsSizeSlope :: CFloat
+    , _grainsSizeGenerator :: String
     , _maxGrainsHeight :: CFloat
     , _maxMovingGrains :: Int
     , _maxNumberGrains :: Int
@@ -79,6 +81,7 @@ defaultOptions = Options {
     , _grainsSizeMean = 2.0
     , _grainsSizeMin = 1.9
     , _grainsSizeSlope = 3.0
+    , _grainsSizeGenerator = "univariate"
     , _maxGrainsHeight = 17
     , _maxMovingGrains = 100
     , _maxNumberGrains = 10000
@@ -96,6 +99,7 @@ grainsGenerationBox = _grainsGenerationBox $ unsafePerformIO getOptions
 grainsSizeMean = _grainsSizeMean $ unsafePerformIO getOptions
 grainsSizeMin = _grainsSizeMin $ unsafePerformIO getOptions
 grainsSizeSlope = _grainsSizeSlope $ unsafePerformIO getOptions
+grainsSizeGenerator = _grainsSizeGenerator $ unsafePerformIO getOptions
 maxGrainsHeight = _maxGrainsHeight $ unsafePerformIO getOptions
 maxMovingGrains = _maxMovingGrains $ unsafePerformIO getOptions
 maxNumberGrains = _maxNumberGrains $ unsafePerformIO getOptions
