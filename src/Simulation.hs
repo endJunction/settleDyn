@@ -255,6 +255,24 @@ createNewGrainAt state ((x, height, z), s) = do
 
     prependGrain state g b
 
+-- Univariate distribution -----------------------------------------------------
+
+-- k is not used
+-- l is not used
+-- m is the return value
+univariate :: (RealFloat a) => (a, a, a) -> a -> a
+univariate (_, _, m) _ = m
+
+-- Bivariate distribution -----------------------------------------------------
+
+-- k is the proportion of l's, k \in [0,1),
+-- l is lower value and
+-- m is upper value.
+bivariate :: (RealFloat a) => (a, a, a) -> a -> a
+bivariate (k, l, m) y
+    | y < k     = l
+    | otherwise = m
+
 -- Weibull distribution -------------------------------------------------------
 
 -- The inverse cumulative density function of Weibull distribution takes three
