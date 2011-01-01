@@ -176,13 +176,10 @@ stepSimulation s dt = do
     gms <- readMVar (grainsMovingStep s)
     let freezeGs = fst $ unzip $ filter
             ((< currentStep - Config.freezeTimeSteps) . snd) (zip bs gms)
-        nFrozenGs = length freezeGs
+        nFrozenGrains = length freezeGs
 
     mapM_ plMakeRigidBodyStatic freezeGs
-    when (nFrozenGs > 0) $ print $
-        show nFrozenGs ++ " grains frozen."
 
-    
         
     let finished = totalGrains > Config.maxNumberGrains
             || height > Config.maxGrainsHeight
@@ -192,9 +189,10 @@ stepSimulation s dt = do
         $ createNewGrain s (height+Config.generateGrainsOffset + 2*Config.grainsSizeMean)
 
     when (Config.verbose) $ print $
-        "Grains total/moving/maxV/height: " ++
+        "Grains total/moving/frozen/maxV/height: " ++
         show totalGrains ++ "/" ++
         show nMovingGrains ++ "/" ++
+        show nFrozenGrains ++ "/" ++
         show (if null norms then 0.0 else maximum norms) ++ "/" ++
         show height ++ "."
 
