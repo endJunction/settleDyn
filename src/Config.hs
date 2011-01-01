@@ -22,7 +22,8 @@ Author: Dmitrij Yu. Naumov
 
 
 module Config (
-      generateGrainsOffset
+      freezeTimeSteps
+    , generateGrainsOffset
     , grainsGenerationBox
     , grainsSizeMean
     , grainsSizeMin
@@ -47,7 +48,8 @@ import System.IO.Unsafe
 import Foreign.C.Types (CFloat)
 
 data Options = Options {
-      _generateGrainsOffset :: CFloat
+      _freezeTimeSteps :: Int
+    , _generateGrainsOffset :: CFloat
     , _grainsGenerationBox :: CFloat -- for random x,z position
     , _grainsSizeMean :: CFloat
     , _grainsSizeMin :: CFloat
@@ -76,7 +78,8 @@ options :: IORef Options
 options = unsafePerformIO $ newIORef defaultOptions
 
 defaultOptions = Options {
-      _generateGrainsOffset = 10
+      _freezeTimeSteps = 10000
+    , _generateGrainsOffset = 10
     , _grainsGenerationBox = 5
     , _grainsSizeMean = 2.0
     , _grainsSizeMin = 1.9
@@ -94,6 +97,7 @@ defaultOptions = Options {
     , _saveEveryStep = False
     }
 
+freezeTimeSteps = _freezeTimeSteps $ unsafePerformIO getOptions
 generateGrainsOffset = _generateGrainsOffset $ unsafePerformIO getOptions
 grainsGenerationBox = _grainsGenerationBox $ unsafePerformIO getOptions
 grainsSizeMean = _grainsSizeMean $ unsafePerformIO getOptions

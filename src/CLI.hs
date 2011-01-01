@@ -93,6 +93,10 @@ optionProcessor =
         ("Velocity threshold. Grains moving faster than\n" ++
         "this threshold are counted as moving grains,\n" ++
         "opposite to settled grains.")
+    , Option "f" ["freezeSteps"]
+        (ReqArg (\s o -> o { _freezeTimeSteps = read s}) "Int")
+        ("Number of simulation steps after which\n" ++
+        "non-moving grains are frozen.")
     , Option "b" ["bbox"]
         (ReqArg (\s o -> o { _grainsGenerationBox = read s }) "Float")
         ("Generate grains randomly in the square\n" ++

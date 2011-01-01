@@ -171,6 +171,18 @@ stepSimulation s dt = do
 
     modifyMVar_ (grainsMovingStep s) (return . updateGrainsMovingStep)
 
+    -- Freeze grains which are not moving for given number of simulation steps.
+    bs <- readMVar (bodies s)
+    gms <- readMVar (grainsMovingStep s)
+    let freezeGs = fst $ unzip $ filter
+            ((< currentStep - Config.freezeTimeSteps) . snd) (zip bs gms)
+        nFrozenGs = length freezeGs
+
+    mapM_ plMakeRigidBodyStatic freezeGs
+    when (nFrozenGs > 0) $ print $
+        show nFrozenGs ++ " grains frozen."
+
+    
         
     let finished = totalGrains > Config.maxNumberGrains
             || height > Config.maxGrainsHeight
