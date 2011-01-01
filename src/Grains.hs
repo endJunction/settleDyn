@@ -2,7 +2,7 @@
 
 {- This file is part of "settle3D" software.
 
-Copyright (C) 2009, 2010
+Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
 "Settle3D" is free software: you can redistribute it and/or modify it under

@@ -1,5 +1,5 @@
 Name:                settle3D
-Version:             0.1
+Version:             0.2
 
 Synopsis:            Sedimentation process simulator for generation of loose
                      sand-like structures.
@@ -12,7 +12,7 @@ License:             GPL-3
 License-file:        LICENSE
 Author:              Dmitrij Yu. Naumov
 Maintainer:          naumov@gfz-potsdam.de
-Copyright:           (C) 2009, 2010 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
+Copyright:           (C) 2009, 2010, 2011 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
 Category:            Scientific Simulation
 Build-type:          Simple

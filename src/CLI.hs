@@ -1,6 +1,6 @@
 {- This file is part of "settle3D" software.
 
-Copyright (C) 2009, 2010
+Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
 "Settle3D" is free software: you can redistribute it and/or modify it under
@@ -38,7 +38,7 @@ helpMessage = usageInfo header optionProcessor
         [ ""
         , "Settle3D---a sedimentation process simulator."
         , ""
-        , "Copyright (C) 2009, 2010 Dmitrij Yu. Naumov, GFZ-Potsdam."
+        , "Copyright (C) 2009 - 2011 Dmitrij Yu. Naumov, GFZ-Potsdam."
         , "This program comes with ABSOLUTELY NO WARRANTY;  This is"
         , "free software, and you are welcome to redistribute it under"
         , "certain conditions;  For details see the LICENSE file."

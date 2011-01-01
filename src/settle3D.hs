@@ -5,7 +5,7 @@ loose-sand--like structures from given particle forms and statistical
 distributions.
 
 
-Copyright (C) 2009, 2010
+Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
 This program is free software: you can redistribute it and/or modify it under

@@ -1,12 +1,12 @@
 
 Programm   : settle3D---a sedimentation process simulator.
-Copyright  : (C) 2009, 2010
+Copyright  : (C) 2009, 2010, 2011
              Helmholtz Centre Potsdam,
              GFZ German Research Centre for Geosciences.
 
 License    : This code is released under the GNU General Public License.
 
-Version    : 0.1
+Version    : 0.2
 Maintainer : naumov@gfz-potsdam.de
 
 Author(s)  : Dmitrij Yu. Naumov
