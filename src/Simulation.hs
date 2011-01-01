@@ -60,6 +60,7 @@ data State = State {
         dworld     ::  PlDynamicsWorldHandle
       , prototypes ::  [([Point], [Tri])]
       , grainsTrafos :: MVar [Transformation] -- Matrices of transformations
+      , grainsMovingStep :: MVar [Int]  -- Last simulation step, when grain was moving
       , grains     ::  MVar [Grain]
       , bodies :: MVar [PlRigidBodyHandle]
       , simulationStep :: MVar Int  -- current step
@@ -71,6 +72,8 @@ prependGrain state g b = do
     modifyMVar_ (bodies state) (return . (b:))
     t <- getGrainsTransformation b
     modifyMVar_ (grainsTrafos state) (return . (t:))
+    i <- readMVar (simulationStep state)
+    modifyMVar_ (grainsMovingStep state) (return . (i:))
 
 -- Writes sizes and volumes of grains.
 writeGrainsStatistics :: State -> FilePath -> IO ()
@@ -137,6 +140,7 @@ stepSimulation s dt = do
     -- dt in milliseconds.
     plStepSimulation (dworld s) $ fromIntegral dt
     modifyMVar_ (simulationStep s) $ return . (1+)
+    currentStep <- readMVar (simulationStep s)
 
     -- Update grains' transformations:
     -- get new transformation matrices
@@ -158,6 +162,15 @@ stepSimulation s dt = do
         staticGs = fst $ unzip $ filter (not . snd) (zip gtsNew isMoving)
 
         height = grainsHeight staticGs
+
+    -- Update simulation time step of grainsMovingStep
+    let updateGrainsMovingStep :: [Int] -> [Int]
+        updateGrainsMovingStep oldValues = map
+            (\(moving, time) -> if moving then currentStep else time)
+            (zip isMoving oldValues)
+
+    modifyMVar_ (grainsMovingStep s) (return . updateGrainsMovingStep)
+
         
     let finished = totalGrains > Config.maxNumberGrains
             || height > Config.maxGrainsHeight
@@ -191,6 +204,7 @@ makeState ps = do
 
     gs <- newMVar []
     gts <- newMVar []
+    gms <- newMVar []
     bs <- newMVar []
     step <- newMVar 0
     return State {
@@ -198,6 +212,7 @@ makeState ps = do
       , grains = gs
       , bodies = bs
       , grainsTrafos = gts
+      , grainsMovingStep = gms
       , prototypes = ps
       , simulationStep = step
     }
