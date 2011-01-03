@@ -153,8 +153,7 @@ stepSimulation s dt = do
         norms = grainsVelocities gts gtsNew $ fromIntegral dt
 
         -- Mark moving grains with True and static with False
-        minMovingNorm = min 1e-3 $ max Config.movingThreshold (maximum norms)/10
-        isMoving = map (> minMovingNorm) norms
+        isMoving = map (> Config.movingThreshold) norms
 
         nMovingGrains = length $ filter (True ==) isMoving
 
