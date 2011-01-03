@@ -339,11 +339,13 @@ createBCube dw ((x,y,z), (w,h,d)) = do
   plAddRigidBody dw b
   plSetPosition b (x,y,z)
 
-groundPlane = [((0,-1,0), (50.0,1.0,50.0))]
+sandboxXZsize = Config.grainsGenerationBox + Config.grainsSizeMean * 2
 
-leftWall  = ((-7,0.5, 0), (1, 100, 7))
-rightWall = (( 7,0.5, 0), (1, 100, 7))
-backWall  = (( 0,0.5,-7), (7, 100, 1))
-frontWall = (( 0,0.5, 7), (7, 100, 1))
+groundPlane = [((0, -1, 0), (2*sandboxXZsize+1, 1, 2*sandboxXZsize+1))]
+
+leftWall  = ((-sandboxXZsize,0.5, 0), (1, 2*Config.maxGrainsHeight, sandboxXZsize))
+rightWall = (( sandboxXZsize,0.5, 0), (1, 2*Config.maxGrainsHeight, sandboxXZsize))
+backWall  = (( 0,0.5,-sandboxXZsize), (sandboxXZsize, 2*Config.maxGrainsHeight, 1))
+frontWall = (( 0,0.5, sandboxXZsize), (sandboxXZsize, 2*Config.maxGrainsHeight, 1))
 
 sandBoxWalls = [leftWall, rightWall, backWall, frontWall]
