@@ -138,7 +138,7 @@ stepSimulation :: State -> Int -> IO Bool
 stepSimulation s dt = do
     -- Compute next simulation timestep.
     -- dt in milliseconds.
-    plStepSimulation (dworld s) $ fromIntegral dt
+    plStepSimulation (dworld s) $ (fromIntegral dt)/60.0
     modifyMVar_ (simulationStep s) $ return . (1+)
     currentStep <- readMVar (simulationStep s)
 
