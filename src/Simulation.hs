@@ -90,7 +90,7 @@ saveGrains s grainWriter =
     readMVar (grainsTrafos s) >>= \trans ->
     forM_ (zip3 [(0::Int)..] gs trans) $ \(i, Grain (ps, ts), t) ->
         grainWriter (file i) ps ts t
-        where file i = Config.outputDirectory ++ "/grain" ++ show i
+        where file i = Config.outputDirectory ++ "/grain" ++ printf "%06d" i
 
 writePovFiles :: State -> IO ()
 writePovFiles s = do
@@ -187,13 +187,13 @@ stepSimulation s dt = do
         && nMovingGrains < Config.maxMovingGrains)
         $ createNewGrain s (height+Config.generateGrainsOffset + 2*Config.grainsSizeMean)
 
-    when (Config.verbose) $ print $
-        "Grains total/moving/frozen/maxV/height: " ++
-        show totalGrains ++ "/" ++
-        show nMovingGrains ++ "/" ++
-        show nFrozenGrains ++ "/" ++
-        show (if null norms then 0.0 else maximum norms) ++ "/" ++
-        show height ++ "."
+    when (Config.verbose) $ putStr $
+        "total/moving/frozen/maxV/height:\t" ++
+        show totalGrains ++ "\t" ++
+        show nMovingGrains ++ "\t" ++
+        show nFrozenGrains ++ "\t" ++
+        show (if null norms then 0.0 else maximum norms) ++ "\t" ++
+        show height ++ "\n"
 
     return (finished
         && nMovingGrains*1000 < totalGrains)
@@ -245,12 +245,8 @@ createNewGrain state height = do
     x <- randomRIO (-boxDim, boxDim :: CFloat)
     z <- randomRIO (-boxDim, boxDim :: CFloat)
 
-    spaceIsFree <- isSpaceGrainFree ([x, height, z], s*1.1) state
     -- skip grain generation to prevent grain overlap
-    when (Config.verbose) $ if spaceIsFree
-        then print "OK -- free space"
-        else print "SKIP this one."
-
+    spaceIsFree <- isSpaceGrainFree ([x, height, z], s*1.1) state
     when spaceIsFree $ createNewGrainAt state ((x, height, z), s)
 
 
@@ -274,8 +270,8 @@ createNewGrainAt state ((x, height, z), s) = do
 
     let g = Grain (ps, ts)
 
-    when (Config.verbose) $ print $
-        "grain's size/volume are " ++ show (size g) ++ "/" ++ show (volume g)
+    when (Config.verbose) $ putStr $
+        "new grain size/volume " ++ show (size g) ++ "/" ++ show (volume g) ++ "\n"
 
     prependGrain state g b
 
