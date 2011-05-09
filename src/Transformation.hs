@@ -26,8 +26,7 @@ module Transformation (
     , module Data.Array.IArray
     ) where
 
-import Foreign.C.Types (CFloat)
 import Data.Array.Unboxed
 import Data.Array.IArray
 
-type Transformation = Array (Int, Int) CFloat
+type Transformation = Array (Int, Int) Double

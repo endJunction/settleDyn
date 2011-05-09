@@ -18,8 +18,7 @@ Category:            Scientific Simulation
 Build-type:          Simple
 Cabal-version:       >=1.4
 
-Extra-source-files:  README, data/*.off
-
+Extra-source-files:  README, data/*.off, cbits/bullet.h, cbits/bullet.cpp
 
 
 Executable settle3D
@@ -28,7 +27,6 @@ Executable settle3D
   
     Build-depends:        array
                         , base >= 4 && < 5
-                        , bullet
                         , directory
                         , parsec >= 3 && < 4
                         , random
@@ -36,4 +34,8 @@ Executable settle3D
   
     GHC-Options:        -Wall -funbox-strict-fields
     GHC-Prof-Options:   -Wall -auto-all -caf-all
+
+    C-Sources:          cbits/bullet.cpp
+    Include-Dirs:       cbits, /usr/include/bullet
+    Extra-Libraries:    BulletDynamics LinearMath BulletCollision
 

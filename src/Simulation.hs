@@ -29,10 +29,8 @@ module Simulation (
     , sandBoxWalls, groundPlane
     ) where
 
-import Physics.Bullet
+import BulletFFI
 import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, swapMVar, newMVar)
-import Foreign (nullPtr)
-import Foreign.C.Types (CFloat)
 
 import Control.Monad (forM_, when, zipWithM_)
 
@@ -42,7 +40,7 @@ import Grains (
         , scalePrototype
         )
 
-import Random (Random(randomIO, randomRIO))
+import System.Random (Random(randomIO, randomRIO))
 import System.IO
 import Text.Printf (printf)
 import PovWriter (toPovray)
@@ -52,7 +50,7 @@ import Transformation
 import qualified Config
 
 type Triple a = (a, a, a)
-type Point = Triple CFloat
+type Point = Triple Double
 type Tri = Triple Int
 
 
@@ -104,7 +102,7 @@ writePovFiles s = do
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
 getGrainsTransformation b = do
-    (ax,ay,az,_,bx,by,bz,_,cx,cy,cz,_,tx,ty,tz,_) <- plGetOpenGLMatrix b
+    [ax,ay,az,_,bx,by,bz,_,cx,cy,cz,_,tx,ty,tz,_] <- plGetOpenGLMatrix b
     return $ array ((0,0), (3,2)) [
         ((0,0), ax), ((0,1), ay), ((0,2), az),
         ((1,0), bx), ((1,1), by), ((1,2), bz),
@@ -114,31 +112,30 @@ getGrainsTransformation b = do
 -------------------------------------------------------------------------------
 
 -- Computes translational velocities of grains' two transformations.
-grainsVelocities :: [Transformation] -> [Transformation] -> CFloat -> [CFloat]
-grainsVelocities tsPrev tsNew dt = zipWith velocity tsPrev tsNew where
-    velocity tPrev tNew = 1/dt * sum 
+grainsVelocities :: [Transformation] -> [Transformation] -> [Double]
+grainsVelocities tsPrev tsNew = zipWith velocity tsPrev tsNew where
+    velocity tPrev tNew = sum
         (zipWith (abs . (-)) (getTranslation tPrev) (getTranslation tNew))
 
 -- Vertical translation part of the transformation matrix
-getTranslation :: Transformation -> [CFloat]
+getTranslation :: Transformation -> [Double]
 getTranslation t = [t!(3,0), t!(3,1), t!(3,2)]
 
 -- Find height of grains given by their transformations.
 -- Height is grains maximum vertical position. Only an approximate value is
 -- needed, so we look the vertical translation part of transformation only. The
 -- barycenters of the grains are in Origin.
-grainsHeight :: [Transformation] -> CFloat
+grainsHeight :: [Transformation] -> Double
 grainsHeight = foldl (flip (max . getHeight)) 0
     where
         -- Select vertical component of translation
-        getHeight :: Transformation -> CFloat
+        getHeight :: Transformation -> Double
         getHeight = flip (!) (3,1)
 
-stepSimulation :: State -> Int -> IO Bool
-stepSimulation s dt = do
+stepSimulation :: State -> IO Bool
+stepSimulation s = do
     -- Compute next simulation timestep.
-    -- dt in milliseconds.
-    plStepSimulation (dworld s) $ (fromIntegral dt)/60.0
+    plStepSimulation (dworld s)
     modifyMVar_ (simulationStep s) $ return . (1+)
     currentStep <- readMVar (simulationStep s)
 
@@ -150,7 +147,7 @@ stepSimulation s dt = do
 
     let totalGrains = length gtsNew
         -- Compute grains' velocities (translations).
-        norms = grainsVelocities gts gtsNew $ fromIntegral dt
+        norms = grainsVelocities gts gtsNew
 
         -- Mark moving grains with True and static with False
         isMoving = map (> Config.movingThreshold) norms
@@ -203,8 +200,7 @@ stepSimulation s dt = do
 
 makeState :: [([Point], [Tri])] -> IO State
 makeState ps = do
-    sdk <- plNewBulletSdk
-    dw <- plCreateDynamicsWorld sdk
+    dw <- plCreateDynamicsWorld
 
     -- set up bullet scene
 
@@ -228,30 +224,30 @@ makeState ps = do
 
 -------------------------------------------------------------------------------
 
-pointIsInsideCube :: ([CFloat], CFloat) -> [CFloat] -> Bool
+pointIsInsideCube :: ([Double], Double) -> [Double] -> Bool
 pointIsInsideCube (p0, s) p = maximum diff < s
     where diff = zipWith (abs . (-)) p0 p
 
-isSpaceGrainFree :: ([CFloat], CFloat) -> State -> IO Bool
+isSpaceGrainFree :: ([Double], Double) -> State -> IO Bool
 isSpaceGrainFree space state
     = fmap (not . any (pointIsInsideCube space . getTranslation))
         (readMVar (grainsTrafos state))
 
-createNewGrain :: State -> CFloat -> IO ()
+createNewGrain :: State -> Double -> IO ()
 createNewGrain state height = do
     -- Generate grains' scale and position
     s <- generateGrainSize
     let boxDim = Config.grainsGenerationBox
-    x <- randomRIO (-boxDim, boxDim :: CFloat)
-    z <- randomRIO (-boxDim, boxDim :: CFloat)
+    x <- randomRIO (-boxDim, boxDim)
+    z <- randomRIO (-boxDim, boxDim)
 
     -- skip grain generation to prevent grain overlap
     spaceIsFree <- isSpaceGrainFree ([x, height, z], s*1.1) state
     when spaceIsFree $ createNewGrainAt state ((x, height, z), s)
 
 
-createNewGrainAt :: State -> (Point, CFloat) -> IO ()
-createNewGrainAt state ((x, height, z), s) = do
+createNewGrainAt :: State -> (Point, Double) -> IO ()
+createNewGrainAt state (pos, s) = do
     -- Select prototype.
     let protos = prototypes state
     prototype <- randomRIO (0, length protos - 1)
@@ -259,14 +255,7 @@ createNewGrainAt state ((x, height, z), s) = do
     let (ps, ts) = scalePrototype p s
 
     -- Add grain to simulation environment.
-    ch <- plNewConvexHullShape Foreign.nullPtr 0 0
-    mapM_ (\(u,v,w) -> plAddVertex ch u v w) ps
-    plSetScaling ch (1-0.04, 1-0.04, 1-0.04)
-    -- New rigid body with given mass and shape.
-    b <- plCreateRigidBody Foreign.nullPtr 1 ch
-    plAddRigidBody (dworld state) b
-
-    plSetPosition b (x, height, z)
+    b <- plPlaceRigidBody (plCreateConvexRigidBody ps) pos (dworld state)
 
     let g = Grain (ps, ts)
 
@@ -312,7 +301,7 @@ icfdWeibull (k, l, m) y
 -- volume(s) = c*s^3, where c is some shape-dependent coefficient.
 -- The grain size distribution can be then given in grain counts: Instead of the
 -- given paramaters K and L one shall use k = K/3 and l = volume(L).
-generateGrainSize :: IO CFloat
+generateGrainSize :: IO Double
 generateGrainSize =
     let k = Config.grainsSizeSlope
         m = Config.grainsSizeMin
@@ -328,11 +317,8 @@ generateGrainSize =
 -------------------------------------------------------------------------------
 
 createBCube :: PlDynamicsWorldHandle -> (Point, Point) -> IO ()
-createBCube dw ((x,y,z), (w,h,d)) = do
-  shape <- plNewBoxShape w h d
-  b <- plCreateRigidBody Foreign.nullPtr 0 shape
-  plAddRigidBody dw b
-  plSetPosition b (x,y,z)
+createBCube dw (position, boxDimensions) =
+    plPlaceRigidBody_ (plCreateBoxRigidBody boxDimensions) position dw
 
 sandboxXZsize = Config.grainsGenerationBox + Config.grainsSizeMean * 2
 

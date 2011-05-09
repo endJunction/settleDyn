@@ -78,7 +78,7 @@ main = do
     state <- makeState grainPrototypes
 
     replicateM_ Config.maxSimulationSteps $ do
-        finished <- stepSimulation state 1
+        finished <- stepSimulation state
         when Config.saveEveryStep $ writePovFiles state
         when finished (saveAndExit state)
 

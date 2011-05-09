@@ -32,35 +32,13 @@ module Grains (
     , size, volume
     ) where
 
-import Foreign.C.Types (CFloat)
 import Data.List (sort)
-import Data.AffineSpace (AffineSpace(..))
 import Data.VectorSpace
 import Data.Cross (HasCross3(..))
 
 import OffReader (readOffFile)
 
-type Point = (CFloat, CFloat, CFloat)
-
--- Make CFloat vector space and so Point --------------------------------------
-instance AdditiveGroup CFloat where
-    zeroV = 0
-    (^+^) = (+)
-    negateV = negate
-
-instance VectorSpace CFloat where
-    type Scalar CFloat = CFloat
-    (*^) = (*)
-
-instance InnerSpace CFloat where
-    (<.>) = (*)
-
-instance AffineSpace CFloat where
-    type Diff CFloat = CFloat
-    (.-.) =  (-)
-    (.+^) =  (+)
--------------------------------------------------------------------------------
-
+type Point = (Double, Double, Double)
 type Triangle = (Int, Int, Int)
 
 getNormal :: [Point] -> Triangle -> Point
@@ -72,13 +50,13 @@ getNormal ps (a, b, c) =
 
 data Grain = Grain ([Point], [Triangle])
 
-scalePrototype :: ([Point], [Triangle]) -> CFloat -> ([Point], [Triangle])
+scalePrototype :: ([Point], [Triangle]) -> Double -> ([Point], [Triangle])
 scalePrototype (ps, ts) s = (map (s *^) ps, ts)
 
 readGrainPrototype :: FilePath -> IO ([Point], [Triangle])
 readGrainPrototype file =
     readOffFile file >>= \(ps, ts) ->
-    return (scalePoints $ centerPoints $ map listToPoints ps
+    return (scalePoints $ centerPoints $ map listToTriples ps
            , map listToTriples ts)
     where
         -- Move barycenter to Origin.
@@ -93,25 +71,20 @@ readGrainPrototype file =
         scalePoints :: [Point] -> [Point]
         scalePoints ps = map (^/ sizePoints ps) ps
         
-        listTriplesWith :: (a -> a -> a -> b) -> [a] -> b
-        listTriplesWith f (x:y:z:_) = f x y z
-
         listToTriples :: [a] -> (a, a, a)
-        listToTriples = listTriplesWith (,,)
-
-        listToPoints :: [Double] -> Point
-        listToPoints = listToTriples . map realToFrac
+        listToTriples (x:y:z:_) = (,,) x y z
+        listToTriples _ = error "Cannot convert list to triple."
 
 -- Size of a grain is defined by second shortest edge length of its bounding
 -- box.
-size :: Grain -> CFloat
+size :: Grain -> Double
 size (Grain (ps, _)) = sizePoints ps
 
-sizePoints :: [Point] -> CFloat
+sizePoints :: [Point] -> Double
 sizePoints = flip (!!) 1 . sort . edgeLengths
     where edgeLengths = toList . uncurry (flip (^-^)) . bbox
 
-volume :: Grain -> CFloat
+volume :: Grain -> Double
 volume (Grain (ps, ts)) = volumeSurface $ map makeT ts
     where
         makeT (a, b, c) = (ps !! a, ps !! b, ps !! c)
@@ -119,7 +92,7 @@ volume (Grain (ps, ts)) = volumeSurface $ map makeT ts
 -- Given a convex triangulated surface with the origin in its interior, the
 -- enclosed volume is the sum of tetrahedrons' volumes from origin to the
 -- surface triangles.
-volumeSurface :: [(Point, Point, Point)] -> CFloat
+volumeSurface :: [(Point, Point, Point)] -> Double
 volumeSurface = foldl (flip $ (+) . volumeTet) 0
 
 -- To calculate a volume enclosed by a convex triangulated surface, we need a
@@ -127,7 +100,7 @@ volumeSurface = foldl (flip $ (+) . volumeTet) 0
 -- origin, and denote the other by /pA/, /pB/ and /pC/. Then its volume is given
 -- by:
 
-volumeTet :: (Point, Point, Point) -> CFloat
+volumeTet :: (Point, Point, Point) -> Double
 volumeTet (a, b, c) = 1/6 * abs (a <.> (b `cross3` c))
 
 -- Bbox -----------------------------------------------------------------------
@@ -143,7 +116,7 @@ bbox ps = (minAll ps, maxAll ps)
 
 -- Operations on points -------------------------------------------------------
 
-toList :: Point -> [CFloat]
+toList :: Point -> [Double]
 toList (x, y, z) = [x, y, z]
 
 minV :: Point -> Point -> Point

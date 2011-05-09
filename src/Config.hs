@@ -45,21 +45,20 @@ module Config (
 
 import Data.IORef
 import System.IO.Unsafe
-import Foreign.C.Types (CFloat)
 
 data Options = Options {
       _freezeTimeSteps :: Int
-    , _generateGrainsOffset :: CFloat
-    , _grainsGenerationBox :: CFloat -- for random x,z position
-    , _grainsSizeMean :: CFloat
-    , _grainsSizeMin :: CFloat
-    , _grainsSizeSlope :: CFloat
+    , _generateGrainsOffset :: Double
+    , _grainsGenerationBox :: Double -- for random x,z position
+    , _grainsSizeMean :: Double
+    , _grainsSizeMin :: Double
+    , _grainsSizeSlope :: Double
     , _grainsSizeGenerator :: String
-    , _maxGrainsHeight :: CFloat
+    , _maxGrainsHeight :: Double
     , _maxMovingGrains :: Int
     , _maxNumberGrains :: Int
     , _maxSimulationSteps :: Int
-    , _movingThreshold :: CFloat
+    , _movingThreshold :: Double
     , _outputDirectory :: String
     , _prototypeFiles :: [FilePath]
     , _verbose :: Bool
