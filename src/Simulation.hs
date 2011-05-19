@@ -26,9 +26,11 @@ module Simulation (
     , stepSimulation
     , prependGrain
     , saveGrains, writeGrainsStatistics, writePovFiles
-    , sandBoxWalls, groundPlane
+    , createBCube
+    , sandBoxWalls
     ) where
 
+import Data.VectorSpace
 import BulletFFI
 import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, swapMVar, newMVar)
 
@@ -200,11 +202,12 @@ stepSimulation s = do
 
 makeState :: [([Point], [Tri])] -> IO State
 makeState ps = do
-    dw <- plCreateDynamicsWorld
+    let worldMin = (minimum . fst . unzip $ sandBoxWalls) ^-^ (1, 1, 1)
+        worldMax = (maximum . snd . unzip $ sandBoxWalls) ^+^ (1, 1, 1)
+    dw <- plCreateDynamicsWorld worldMin worldMax
 
     -- set up bullet scene
 
-    mapM_ (createBCube dw) groundPlane
     mapM_ (createBCube dw) sandBoxWalls
 
     gs <- newMVar []
@@ -320,13 +323,16 @@ createBCube :: PlDynamicsWorldHandle -> (Point, Point) -> IO ()
 createBCube dw (position, boxDimensions) =
     plPlaceRigidBody_ (plCreateBoxRigidBody boxDimensions) position dw
 
+sandboxXZsize :: Double
 sandboxXZsize = Config.grainsGenerationBox + Config.grainsSizeMean * 2
 
-groundPlane = [((0, -1, 0), (2*sandboxXZsize+1, 1, 2*sandboxXZsize+1))]
+groundPlane, leftWall, rightWall, backWall, frontWall :: (Point, Point)
 
+groundPlane = ((0, -1, 0), (2*sandboxXZsize+1, 1, 2*sandboxXZsize+1))
 leftWall  = ((-sandboxXZsize,0.5, 0), (1, 2*Config.maxGrainsHeight, sandboxXZsize))
 rightWall = (( sandboxXZsize,0.5, 0), (1, 2*Config.maxGrainsHeight, sandboxXZsize))
 backWall  = (( 0,0.5,-sandboxXZsize), (sandboxXZsize, 2*Config.maxGrainsHeight, 1))
 frontWall = (( 0,0.5, sandboxXZsize), (sandboxXZsize, 2*Config.maxGrainsHeight, 1))
 
-sandBoxWalls = [leftWall, rightWall, backWall, frontWall]
+sandBoxWalls :: [(Point, Point)]
+sandBoxWalls = [groundPlane, leftWall, rightWall, backWall, frontWall]

@@ -28,66 +28,50 @@ subject to the following restrictions:
 #include "BulletCollision/Gimpact/btGImpactShape.h"
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 
-/*
-	Create and Delete a Physics SDK	
-*/
-
-struct	btPhysicsSdk
-{
-
-//	btDispatcher*				m_dispatcher;
-//	btOverlappingPairCache*		m_pairCache;
-//	btConstraintSolver*			m_constraintSolver
-
-	btVector3	m_worldAabbMin;
-	btVector3	m_worldAabbMax;
-
-
-	//todo: version, hardware/optimization settings etc?
-	btPhysicsSdk()
-		:m_worldAabbMin(-1000,-1000,-1000),
-		m_worldAabbMax(1000,1000,1000)
-	{
-
-	}
-
-	
-};
-
-plPhysicsSdkHandle	plNewBulletSdk()
-{
-	void* mem = btAlignedAlloc(sizeof(btPhysicsSdk),16);
-	return (plPhysicsSdkHandle)new (mem)btPhysicsSdk;
-}
-
-void		plDeletePhysicsSdk(plPhysicsSdkHandle	physicsSdk)
-{
-	btPhysicsSdk* phys = reinterpret_cast<btPhysicsSdk*>(physicsSdk);
-	btAlignedFree(phys);	
-}
-
-
 /* Dynamics World */
-plDynamicsWorldHandle plCreateDynamicsWorld(plPhysicsSdkHandle physicsSdkHandle)
+plDynamicsWorldHandle
+plCreateDynamicsWorld(
+    btVector3 worldAabbMin = btVector3(-1000,-1000,-1000),
+    btVector3 worldAabbMax = btVector3( 1000, 1000, 1000))
 {
-	btPhysicsSdk* physicsSdk = reinterpret_cast<btPhysicsSdk*>(physicsSdkHandle);
-	void* mem = btAlignedAlloc(sizeof(btDefaultCollisionConfiguration),16);
-	btDefaultCollisionConfiguration* collisionConfiguration = new (mem)btDefaultCollisionConfiguration();
-	mem = btAlignedAlloc(sizeof(btCollisionDispatcher),16);
-	btDispatcher*				dispatcher = new (mem)btCollisionDispatcher(collisionConfiguration);
-	mem = btAlignedAlloc(sizeof(btAxisSweep3),16);
-	btBroadphaseInterface*		pairCache = new (mem)btAxisSweep3(physicsSdk->m_worldAabbMin,physicsSdk->m_worldAabbMax);
-	mem = btAlignedAlloc(sizeof(btSequentialImpulseConstraintSolver),16);
-	btConstraintSolver*			constraintSolver = new(mem) btSequentialImpulseConstraintSolver();
+    void* mem = btAlignedAlloc(sizeof(btDefaultCollisionConfiguration),16);
+    btDefaultCollisionConfiguration* collisionConfiguration =
+        new (mem)btDefaultCollisionConfiguration();
 
-	mem = btAlignedAlloc(sizeof(btDiscreteDynamicsWorld),16);
-	return (plDynamicsWorldHandle) new (mem)btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration);
+    mem = btAlignedAlloc(sizeof(btCollisionDispatcher),16);
+    btDispatcher* dispatcher =
+        new (mem)btCollisionDispatcher(collisionConfiguration);
+
+    mem = btAlignedAlloc(sizeof(btAxisSweep3),16);
+    btBroadphaseInterface* pairCache =
+        new (mem)btAxisSweep3(worldAabbMin, worldAabbMax);
+
+    mem = btAlignedAlloc(sizeof(btSequentialImpulseConstraintSolver),16);
+    btConstraintSolver* constraintSolver =
+        new(mem) btSequentialImpulseConstraintSolver();
+
+    mem = btAlignedAlloc(sizeof(btDiscreteDynamicsWorld),16);
+    btDiscreteDynamicsWorld* dynamicsWorld =
+        new (mem)btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration);
+
+    return (plDynamicsWorldHandle) dynamicsWorld;
 }
-void           plDeleteDynamicsWorld(plDynamicsWorldHandle world)
+
+void
+plDeleteDynamicsWorld(plDynamicsWorldHandle world)
 {
-	//todo: also clean up the other allocations, axisSweep, pairCache,dispatcher,constraintSolver,collisionConfiguration
-	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
-	btAlignedFree(dynamicsWorld);
+    btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
+	btAssert(dynamicsWorld);
+
+    btAlignedFree(dynamicsWorld->getConstraintSolver());
+    btAlignedFree(dynamicsWorld->getBroadphase());
+    btAlignedFree(dynamicsWorld->getDispatcher());
+
+    // DynamicsWorld does not safe collisionConfiguration object, only
+    // stackAllocator. Not clear how to delete collisionConfiguration from
+    // inside of this destructor.
+
+    btAlignedFree(dynamicsWorld);
 }
 
 void	plStepSimulation(plDynamicsWorldHandle world,	plReal	timeStep)

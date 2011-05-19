@@ -50,23 +50,21 @@ type PlCollisionShapeHandle = Ptr PlCollisionShape
 data PlDynamicsWorld = PlDynamicsWorld
 type PlDynamicsWorldHandle = Ptr PlDynamicsWorld
 
-data PlPhysicsSdk = PlPhysicsSdk
-type PlPhysicsSdkHandle = Ptr PlPhysicsSdk
-
 data PlRigidBody = PlRigidBody
 type PlRigidBodyHandle = Ptr PlRigidBody
 
 --
 -- Creating bullet physics world.
 --
-plCreateDynamicsWorld :: IO PlDynamicsWorldHandle
-plCreateDynamicsWorld = plNewBulletSdk_ >>= plCreateDynamicsWorld_
+plCreateDynamicsWorld :: (Real a) => Triple a -> Triple a -> IO PlDynamicsWorldHandle
+plCreateDynamicsWorld worldMin worldMax =
+    withTriple' worldMin (\ wMin ->
+    withTriple' worldMax (\ wMax ->
+    plCreateDynamicsWorld_ wMin wMax))
+    where withTriple' = flip withTriple
 
-foreign import ccall safe "plNewBulletSdk" plNewBulletSdk_
-    :: IO PlPhysicsSdkHandle
 foreign import ccall safe "plCreateDynamicsWorld" plCreateDynamicsWorld_
-    :: PlPhysicsSdkHandle -> IO PlDynamicsWorldHandle
-
+    :: PlVector3 -> PlVector3 -> IO PlDynamicsWorldHandle
 
 --
 -- Step simulation.

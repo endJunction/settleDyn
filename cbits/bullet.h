@@ -35,9 +35,6 @@ typedef plReal	plQuaternion[4];
 extern "C" { 
 #endif
 
-/**	Particular physics SDK (C-API) */
-	PL_DECLARE_HANDLE(plPhysicsSdkHandle);
-
 /** 	Dynamics world, belonging to some physics SDK (C-API)*/
 	PL_DECLARE_HANDLE(plDynamicsWorldHandle);
 
@@ -47,17 +44,10 @@ extern "C" {
 /** 	Collision Shape/Geometry, property of a Rigid Body (C-API)*/
 	PL_DECLARE_HANDLE(plCollisionShapeHandle);
 
-/**
-	Create and Delete a Physics SDK	
-*/
-
-	extern	plPhysicsSdkHandle	plNewBulletSdk(); //this could be also another sdk, like ODE, PhysX etc.
-	extern	void		plDeletePhysicsSdk(plPhysicsSdkHandle	physicsSdk);
-
 
 /* Dynamics World */
 
-	extern  plDynamicsWorldHandle plCreateDynamicsWorld(plPhysicsSdkHandle physicsSdk);
+	extern  plDynamicsWorldHandle plCreateDynamicsWorld(plVector3 worldAabbMin, plVector3 worldAabbMax);
 
 	extern  void           plDeleteDynamicsWorld(plDynamicsWorldHandle world);
 
