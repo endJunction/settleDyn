@@ -113,12 +113,6 @@ getGrainsTransformation b = do
     
 -------------------------------------------------------------------------------
 
--- Computes translational velocities of grains' two transformations.
-grainsVelocities :: [Transformation] -> [Transformation] -> [Double]
-grainsVelocities tsPrev tsNew = zipWith velocity tsPrev tsNew where
-    velocity tPrev tNew = sum
-        (zipWith (abs . (-)) (getTranslation tPrev) (getTranslation tNew))
-
 -- Vertical translation part of the transformation matrix
 getTranslation :: Transformation -> [Double]
 getTranslation t = [t!(3,0), t!(3,1), t!(3,2)]
@@ -141,18 +135,17 @@ stepSimulation s = do
     modifyMVar_ (simulationStep s) $ return . (1+)
     currentStep <- readMVar (simulationStep s)
 
+    bs <- readMVar $ bodies s
     -- Update grains' transformations:
     -- get new transformation matrices
-    gtsNew <- mapM getGrainsTransformation =<< readMVar (bodies s)
+    gtsNew <- mapM getGrainsTransformation bs
     -- and replace instead of previous simulation step transformations.
     gts <- swapMVar (grainsTrafos s) gtsNew
 
+    velocities <- mapM (fmap magnitude . plGetVelocity) bs
     let totalGrains = length gtsNew
-        -- Compute grains' velocities (translations).
-        norms = grainsVelocities gts gtsNew
-
         -- Mark moving grains with True and static with False
-        isMoving = map (> Config.movingThreshold) norms
+        isMoving = map (> Config.movingThreshold) velocities
 
         nMovingGrains = length $ filter (True ==) isMoving
 
@@ -170,7 +163,6 @@ stepSimulation s = do
     modifyMVar_ (grainsMovingStep s) (return . updateGrainsMovingStep)
 
     -- Freeze grains which are not moving for given number of simulation steps.
-    bs <- readMVar (bodies s)
     gms <- readMVar (grainsMovingStep s)
     let freezeGs = fst $ unzip $ filter
             ((< currentStep - Config.freezeTimeSteps) . snd) (zip bs gms)
@@ -191,7 +183,7 @@ stepSimulation s = do
         show totalGrains ++ "\t" ++
         show nMovingGrains ++ "\t" ++
         show nFrozenGrains ++ "\t" ++
-        show (if null norms then 0.0 else maximum norms) ++ "\t" ++
+        show (if null velocities then 0.0 else maximum velocities) ++ "\t" ++
         show height ++ "\n"
 
     return (finished
