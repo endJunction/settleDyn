@@ -39,6 +39,7 @@ module BulletFFI (
 
     plGetOpenGLMatrix,
     plGetVelocity,
+    plGetPosition,
 ) where
 
 import Foreign
@@ -113,6 +114,11 @@ foreign import ccall safe "plGetVelocity" plGetVelocity_
     :: PlRigidBodyHandle -> Ptr CFloat -> IO ()
 plGetVelocity :: PlRigidBodyHandle -> IO (Triple Double)
 plGetVelocity body = fmap listToTriple $ callWithArray 3 (plGetVelocity_ body)
+
+foreign import ccall safe "plGetPosition" plGetPosition_
+    :: PlRigidBodyHandle -> Ptr CFloat -> IO ()
+plGetPosition :: PlRigidBodyHandle -> IO (Triple Double)
+plGetPosition body = fmap listToTriple $ callWithArray 3 (plGetPosition_ body)
 
 --
 -- Creating rigid bodies.

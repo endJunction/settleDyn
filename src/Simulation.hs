@@ -117,16 +117,12 @@ getGrainsTransformation b = do
 getTranslation :: Transformation -> [Double]
 getTranslation t = [t!(3,0), t!(3,1), t!(3,2)]
 
--- Find height of grains given by their transformations.
--- Height is grains maximum vertical position. Only an approximate value is
--- needed, so we look the vertical translation part of transformation only. The
--- barycenters of the grains are in Origin.
-grainsHeight :: [Transformation] -> Double
-grainsHeight = foldl (flip (max . getHeight)) 0
+-- Find height of a grain. Height is grains maximum vertical position. Only an
+-- approximate value is needed, so center of mass positions are sufficient.
+getGrainsHeight :: PlRigidBodyHandle -> IO Double
+getGrainsHeight = fmap getVerticalPart . plGetPosition
     where
-        -- Select vertical component of translation
-        getHeight :: Transformation -> Double
-        getHeight = flip (!) (3,1)
+        getVerticalPart (_, y, _) = y
 
 stepSimulation :: State -> IO Bool
 stepSimulation s = do
@@ -150,9 +146,9 @@ stepSimulation s = do
         nMovingGrains = length $ filter (True ==) isMoving
 
         -- Select static grains' transformations from gtsNew list.
-        staticGs = fst $ unzip $ filter (not . snd) (zip gtsNew isMoving)
+        staticGs = fst $ unzip $ filter (not . snd) (zip bs isMoving)
 
-        height = grainsHeight staticGs
+    height <- fmap (foldl max 0) $ mapM getGrainsHeight staticGs
 
     -- Update simulation time step of grainsMovingStep
     let updateGrainsMovingStep :: [Int] -> [Int]
