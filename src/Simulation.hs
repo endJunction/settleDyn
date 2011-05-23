@@ -140,21 +140,24 @@ stepSimulation s = do
 
     velocities <- mapM (fmap magnitude . plGetVelocity) bs
     let totalGrains = length gtsNew
-        -- Mark moving grains with True and static with False
-        isMoving = map (> Config.movingThreshold) velocities
+        -- Mark static grains with True and static with False
+        isStatic = map (< Config.movingThreshold) velocities
 
-        nMovingGrains = length $ filter (True ==) isMoving
+        nMovingGrains = length $ filter (False ==) isStatic
 
-        -- Select static grains' transformations from gtsNew list.
-        staticGs = fst $ unzip $ filter (not . snd) (zip bs isMoving)
+        -- Select static grains.
+        staticGs = filterBy isStatic bs
+            where
+                filterBy :: [Bool] -> [a] -> [a]
+                filterBy tests = snd . unzip . filter fst . zip tests
 
     height <- fmap (foldl max 0) $ mapM getGrainsHeight staticGs
 
     -- Update simulation time step of grainsMovingStep
     let updateGrainsMovingStep :: [Int] -> [Int]
         updateGrainsMovingStep oldValues = map
-            (\(moving, time) -> if moving then currentStep else time)
-            (zip isMoving oldValues)
+            (\(static, time) -> if static then time else currentStep)
+            (zip isStatic oldValues)
 
     modifyMVar_ (grainsMovingStep s) (return . updateGrainsMovingStep)
 
