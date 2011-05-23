@@ -38,6 +38,7 @@ module BulletFFI (
     plMakeRigidBodyStatic,
 
     plGetOpenGLMatrix,
+    plGetVelocity,
 ) where
 
 import Foreign
@@ -85,6 +86,17 @@ withTriple f v = withArray (tripleToList v) (f . PlVector3)
     tripleToList :: Real a => Triple a -> [CFloat]
     tripleToList (a0, a1, a2) = map realToFrac [a0, a1, a2]
 
+-- | Call function, where the last function argument is an array of given length
+-- filled by called function.
+callWithArray :: (Real a, Storable a, Fractional b) => Int -> (Ptr a -> IO ()) -> IO [b]
+callWithArray l f = allocaArray l
+    (\p -> f p >> fmap (map realToFrac) (peekArray l p))
+
+listToTriple :: [a] -> Triple a
+listToTriple as
+    | length as == 3 = (as!!0, as!!1, as!!2)
+    | otherwise = error $ "Try to convert list of length " ++ show (length as)
+        ++ " to triple."
 
 foreign import ccall safe "plSetMassProps" plSetMassProps_
     :: PlRigidBodyHandle -> CFloat -> Ptr CFloat -> IO ()
@@ -95,8 +107,12 @@ plMakeRigidBodyStatic b = allocaArray 3 $
 foreign import ccall safe "plGetOpenGLMatrix" plGetOpenGLMatrix_
     :: PlRigidBodyHandle -> Ptr CFloat -> IO ()
 plGetOpenGLMatrix :: PlRigidBodyHandle -> IO [Double]
-plGetOpenGLMatrix body = allocaArray 16
-    (\p -> plGetOpenGLMatrix_ body p >> fmap (map realToFrac) (peekArray 16 p))
+plGetOpenGLMatrix body = callWithArray 16 (plGetOpenGLMatrix_ body)
+
+foreign import ccall safe "plGetVelocity" plGetVelocity_
+    :: PlRigidBodyHandle -> Ptr CFloat -> IO ()
+plGetVelocity :: PlRigidBodyHandle -> IO (Triple Double)
+plGetVelocity body = fmap listToTriple $ callWithArray 3 (plGetVelocity_ body)
 
 --
 -- Creating rigid bodies.

@@ -227,3 +227,13 @@ void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation)
 	orientation[2] = orn.getZ();
 	orientation[3] = orn.getW();
 }
+
+void plGetVelocity(plRigidBodyHandle object, plVector3 velocity)
+{
+	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
+	btAssert(body);
+	const btVector3& v = body->getLinearVelocity();
+	velocity[0] = v.getX();
+	velocity[1] = v.getY();
+	velocity[2] = v.getZ();
+}

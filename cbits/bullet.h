@@ -81,6 +81,7 @@ extern "C" {
 	extern void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix);
 	extern void	plGetPosition(plRigidBodyHandle object,plVector3 position);
 	extern void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation);
+    extern void plGetVelocity(plRigidBodyHandle object, plVector3 velocity);
 
 	/* set world transform (position/orientation) */
 	extern  void plSetPosition(plRigidBodyHandle object, const plVector3 position);
