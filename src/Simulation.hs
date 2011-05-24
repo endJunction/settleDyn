@@ -158,7 +158,7 @@ stepSimulation s = do
     mapM_ plMakeRigidBodyStatic freezeGs
 
         
-    let finished = totalGrains > Config.maxNumberGrains
+    let finished = totalGrains >= Config.maxNumberGrains
             || height > Config.maxGrainsHeight
 
     when (not finished
@@ -173,8 +173,7 @@ stepSimulation s = do
         show (if null velocities then 0.0 else maximum velocities) ++ "\t" ++
         show height ++ "\n"
 
-    return (finished
-        && nMovingGrains*1000 < totalGrains)
+    return (finished && nMovingGrains == 0)
 
 
 -------------------------------------------------------------------------------
