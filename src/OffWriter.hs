@@ -36,7 +36,7 @@ showT (x, y, z) = unwords [show x, show y, show z]
 type Point a = Triple a
 type Tri = Triple Int
 
-writeOffFile :: (Fractional a) => String -> [Point a] -> [Tri] -> Transformation -> IO ()
+writeOffFile :: (Fractional a) => FilePath -> [Point a] -> [Tri] -> Transformation -> IO ()
 writeOffFile f ps ts m = writeFile (f ++ ".off") $ header (length ps) (length ts)
                                   ++ unlines (sPoints $ move ps m)
                                   ++ unlines (sTris ts)
