@@ -27,7 +27,9 @@ module Grains (
       Grain(..)
     , readGrainPrototype
     , Point, Triangle
+    , points, triangles
     , getNormal
+    , scale
     , scalePrototype
     , size, volume
     ) where
@@ -52,6 +54,15 @@ data Grain = Grain ([Point], [Triangle])
 
 scalePrototype :: ([Point], [Triangle]) -> Double -> ([Point], [Triangle])
 scalePrototype (ps, ts) s = (map (s *^) ps, ts)
+
+points :: Grain -> [Point]
+points (Grain (ps,_)) = ps
+
+triangles :: Grain -> [Triangle]
+triangles (Grain (_,ts)) = ts
+
+scale :: Double -> Grain -> Grain
+scale s (Grain (ps, ts)) = Grain (map (s *^) ps, ts)
 
 readGrainPrototype :: FilePath -> IO ([Point], [Triangle])
 readGrainPrototype file =
