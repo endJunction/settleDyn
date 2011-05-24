@@ -75,10 +75,7 @@ prependGrain state g b = do
 -- Writes sizes and volumes of grains.
 writeGrainsStatistics :: State -> FilePath -> IO ()
 writeGrainsStatistics s f =
-    readMVar (grains s) >>= writeFile f . unlines . map showSV
-    where 
-        showSV :: Grain -> String
-        showSV g = show (size g) ++ " " ++ show (volume g)
+    readMVar (grains s) >>= writeFile f . unlines . map show
 
 -- Writes the grains in the current state with grainWriter.
 saveGrains :: State -> (String -> [Point] -> [Tri] -> Transformation -> IO ()) -> IO ()
@@ -242,7 +239,7 @@ createNewGrainAt state (pos, s) = do
     let g = Grain (ps, ts)
 
     when (Config.verbose) $ putStr $
-        "new grain size/volume " ++ show (size g) ++ "/" ++ show (volume g) ++ "\n"
+        "new grain size/volume " ++ show g ++ "\n"
 
     prependGrain state g b
 

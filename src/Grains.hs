@@ -52,6 +52,8 @@ getNormal ps (a, b, c) =
 
 data Grain = Grain ([Point], [Triangle])
 
+instance Show Grain where
+    show g = show (size g) ++ " " ++ show (volume g)
 scalePrototype :: ([Point], [Triangle]) -> Double -> ([Point], [Triangle])
 scalePrototype (ps, ts) s = (map (s *^) ps, ts)
 
