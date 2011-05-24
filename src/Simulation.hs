@@ -32,7 +32,7 @@ module Simulation (
 
 import Data.VectorSpace
 import BulletFFI
-import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, swapMVar, newMVar)
+import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, newMVar)
 
 import Control.Monad (forM_, when, zipWithM_)
 
@@ -59,7 +59,6 @@ type Tri = Triple Int
 data State = State {
         dworld     ::  PlDynamicsWorldHandle
       , prototypes ::  [([Point], [Tri])]
-      , grainsTrafos :: MVar [Transformation] -- Matrices of transformations
       , grainsMovingStep :: MVar [Int]  -- Last simulation step, when grain was moving
       , grains     ::  MVar [Grain]
       , bodies :: MVar [PlRigidBodyHandle]
@@ -70,8 +69,6 @@ prependGrain :: State -> Grain -> PlRigidBodyHandle -> IO ()
 prependGrain state g b = do
     modifyMVar_ (grains state) (return . (g:))
     modifyMVar_ (bodies state) (return . (b:))
-    t <- getGrainsTransformation b
-    modifyMVar_ (grainsTrafos state) (return . (t:))
     i <- readMVar (simulationStep state)
     modifyMVar_ (grainsMovingStep state) (return . (i:))
 
@@ -87,7 +84,7 @@ writeGrainsStatistics s f =
 saveGrains :: State -> (String -> [Point] -> [Tri] -> Transformation -> IO ()) -> IO ()
 saveGrains s grainWriter =
     readMVar (grains s) >>= \gs ->
-    readMVar (grainsTrafos s) >>= \trans ->
+    readMVar (bodies s) >>= mapM getGrainsTransformation >>= \trans ->
     forM_ (zip3 [(0::Int)..] gs trans) $ \(i, Grain (ps, ts), t) ->
         grainWriter (file i) ps ts t
         where file i = Config.outputDirectory ++ "/grain" ++ printf "%06d" i
@@ -96,7 +93,7 @@ writePovFiles :: State -> IO ()
 writePovFiles s = do
     i <- readMVar (simulationStep s)
     gs <- readMVar (grains s)
-    gts <- readMVar (grainsTrafos s)
+    gts <- mapM getGrainsTransformation =<< readMVar (bodies s)
     let f = Config.outputDirectory ++ "/grains" ++ printf "%06d" i ++ ".mesh"
 
     withFile f WriteMode (\fh ->
@@ -128,14 +125,9 @@ stepSimulation s = do
     currentStep <- readMVar (simulationStep s)
 
     bs <- readMVar $ bodies s
-    -- Update grains' transformations:
-    -- get new transformation matrices
-    gtsNew <- mapM getGrainsTransformation bs
-    -- and replace instead of previous simulation step transformations.
-    gts <- swapMVar (grainsTrafos s) gtsNew
 
     velocities <- mapM (fmap magnitude . plGetVelocity) bs
-    let totalGrains = length gtsNew
+    let totalGrains = length bs
         -- Mark static grains with True and static with False
         isStatic = map (< Config.movingThreshold) velocities
 
@@ -198,7 +190,6 @@ makeState ps = do
     mapM_ (createBCube dw) sandBoxWalls
 
     gs <- newMVar []
-    gts <- newMVar []
     gms <- newMVar []
     bs <- newMVar []
     step <- newMVar 0
@@ -206,7 +197,6 @@ makeState ps = do
         dworld = dw
       , grains = gs
       , bodies = bs
-      , grainsTrafos = gts
       , grainsMovingStep = gms
       , prototypes = ps
       , simulationStep = step
