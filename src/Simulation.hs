@@ -113,10 +113,6 @@ getGrainsTransformation b = do
     
 -------------------------------------------------------------------------------
 
--- Vertical translation part of the transformation matrix
-getTranslation :: Transformation -> [Double]
-getTranslation t = [t!(3,0), t!(3,1), t!(3,2)]
-
 -- Find height of a grain. Height is grains maximum vertical position. Only an
 -- approximate value is needed, so center of mass positions are sufficient.
 getGrainsHeight :: PlRigidBodyHandle -> IO Double
@@ -218,14 +214,17 @@ makeState ps = do
 
 -------------------------------------------------------------------------------
 
-pointIsInsideCube :: ([Double], Double) -> [Double] -> Bool
-pointIsInsideCube (p0, s) p = maximum diff < s
-    where diff = zipWith (abs . (-)) p0 p
+isSpaceGrainFree :: (Point, Double) -> State -> IO Bool
+isSpaceGrainFree (p0, radius) state =
+    readMVar (bodies state) >>=
+    fmap isFree . mapM plGetPosition
+    where
+        isFree :: [Point] -> Bool
+        isFree = all pointIsOutsideSphere
 
-isSpaceGrainFree :: ([Double], Double) -> State -> IO Bool
-isSpaceGrainFree space state
-    = fmap (not . any (pointIsInsideCube space . getTranslation))
-        (readMVar (grainsTrafos state))
+        pointIsOutsideSphere :: Point -> Bool
+        pointIsOutsideSphere = (radius <) . magnitude . (p0 ^-^)
+
 
 createNewGrain :: State -> Double -> IO ()
 createNewGrain state height = do
@@ -236,7 +235,7 @@ createNewGrain state height = do
     z <- randomRIO (-boxDim, boxDim)
 
     -- skip grain generation to prevent grain overlap
-    spaceIsFree <- isSpaceGrainFree ([x, height, z], s*1.1) state
+    spaceIsFree <- isSpaceGrainFree ((x, height, z), s*1.1) state
     when spaceIsFree $ createNewGrainAt state ((x, height, z), s)
 
 
