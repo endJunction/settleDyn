@@ -36,11 +36,7 @@ import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, newMVar)
 
 import Control.Monad (forM_, when, zipWithM_)
 
-import Grains (
-          Grain(..)
-        , size, volume
-        , scalePrototype
-        )
+import qualified Grains as G (Grain, points, triangles, scale)
 
 import System.Random (Random(randomIO, randomRIO))
 import System.IO
@@ -58,14 +54,14 @@ type Tri = Triple Int
 
 data State = State {
         dworld     ::  PlDynamicsWorldHandle
-      , prototypes ::  [([Point], [Tri])]
+      , prototypes ::  [G.Grain]
       , grainsMovingStep :: MVar [Int]  -- Last simulation step, when grain was moving
-      , grains     ::  MVar [Grain]
+      , grains     ::  MVar [G.Grain]
       , bodies :: MVar [PlRigidBodyHandle]
       , simulationStep :: MVar Int  -- current step
 }
 
-prependGrain :: State -> Grain -> PlRigidBodyHandle -> IO ()
+prependGrain :: State -> G.Grain -> PlRigidBodyHandle -> IO ()
 prependGrain state g b = do
     modifyMVar_ (grains state) (return . (g:))
     modifyMVar_ (bodies state) (return . (b:))
@@ -78,13 +74,12 @@ writeGrainsStatistics s f =
     readMVar (grains s) >>= writeFile f . unlines . map show
 
 -- Writes the grains in the current state with grainWriter.
-saveGrains :: State -> (String -> [Point] -> [Tri] -> Transformation -> IO ()) -> IO ()
-saveGrains s grainWriter =
-    readMVar (grains s) >>= \gs ->
-    readMVar (bodies s) >>= mapM getGrainsTransformation >>= \trans ->
-    forM_ (zip3 [(0::Int)..] gs trans) $ \(i, Grain (ps, ts), t) ->
-        grainWriter (file i) ps ts t
-        where file i = Config.outputDirectory ++ "/grain" ++ printf "%06d" i
+saveGrains :: State -> (FilePath -> G.Grain -> Transformation -> IO ()) -> IO ()
+saveGrains s grainWriter = do
+    gs <- readMVar (grains s)
+    trans <- readMVar (bodies s) >>= mapM getGrainsTransformation
+    let files = map (\ i -> Config.outputDirectory ++ "/grain" ++ printf "%06d" i) [(0::Int)..]
+    sequence_ (zipWith3 grainWriter files gs trans)
 
 writePovFiles :: State -> IO ()
 writePovFiles s = do
@@ -94,7 +89,7 @@ writePovFiles s = do
     let f = Config.outputDirectory ++ "/grains" ++ printf "%06d" i ++ ".mesh"
 
     withFile f WriteMode (\fh ->
-        zipWithM_ (\(Grain (ps, ts)) -> hPutStr fh . toPovray ps ts) gs gts)
+        zipWithM_ (\ g -> hPutStr fh . toPovray (G.points g) (G.triangles g)) gs gts)
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
 getGrainsTransformation b = do
@@ -175,7 +170,7 @@ stepSimulation s = do
 
 -------------------------------------------------------------------------------
 
-makeState :: [([Point], [Tri])] -> IO State
+makeState :: [G.Grain] -> IO State
 makeState ps = do
     let worldMin = (minimum . fst . unzip $ sandBoxWalls) ^-^ (1, 1, 1)
         worldMax = (maximum . snd . unzip $ sandBoxWalls) ^+^ (1, 1, 1)
@@ -226,17 +221,14 @@ createNewGrain state height = do
 
 
 createNewGrainAt :: State -> (Point, Double) -> IO ()
-createNewGrainAt state (pos, s) = do
+createNewGrainAt state (pos, scale) = do
     -- Select prototype.
-    let protos = prototypes state
-    prototype <- randomRIO (0, length protos - 1)
-    let p = protos !! prototype
-    let (ps, ts) = scalePrototype p s
+    let ps = prototypes state
+    prototype <- randomRIO (0, length ps - 1)
+    let g = G.scale scale $ ps !! prototype
 
     -- Add grain to simulation environment.
-    b <- plPlaceRigidBody (plCreateConvexRigidBody ps) pos (dworld state)
-
-    let g = Grain (ps, ts)
+    b <- plPlaceRigidBody (plCreateConvexRigidBody $ G.points g) pos (dworld state)
 
     when (Config.verbose) $ putStr $
         "new grain size/volume " ++ show g ++ "\n"

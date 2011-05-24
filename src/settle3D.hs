@@ -28,20 +28,19 @@ Author: Dmitrij Yu. Naumov
 import System.Exit (exitWith, ExitCode(..))
 import Control.Monad (replicateM_, when)
 
-import Grains (readGrainPrototype)
+import Grains (readGrain, writeGrain)
 import Simulation (State, makeState, stepSimulation, saveGrains, writeGrainsStatistics, writePovFiles)
 
 import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
 import qualified CLI
 
-import OffWriter
 import System.Environment (getArgs)
 
 import System.Directory (createDirectory, doesDirectoryExist)
 
 saveAndExit :: State -> IO ()
 saveAndExit state = do
-    saveGrains state writeOffFile
+    saveGrains state writeGrain
     writeGrainsStatistics state $ Config.outputDirectory ++ "/statistics.txt"
     exitWith ExitSuccess
 
@@ -63,7 +62,7 @@ main = do
     when (null Config.prototypeFiles) $
         print "No prototype files were given. Exiting."
             >> exitWith (ExitFailure 2)
-    grainPrototypes <- mapM readGrainPrototype Config.prototypeFiles
+    grainPrototypes <- mapM readGrain Config.prototypeFiles
 
 
     -- Check output directory and create when necessary.

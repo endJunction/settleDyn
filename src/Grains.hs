@@ -25,12 +25,11 @@ Author: Dmitrij Yu. Naumov
 
 module Grains (
       Grain(..)
-    , readGrainPrototype
     , Point, Triangle
     , points, triangles
+    , readGrain, writeGrain
     , getNormal
     , scale
-    , scalePrototype
     , size, volume
     ) where
 
@@ -38,7 +37,10 @@ import Data.List (sort)
 import Data.VectorSpace
 import Data.Cross (HasCross3(..))
 
-import OffReader (readOffFile)
+import Transformation
+
+import OffReader
+import OffWriter
 
 type Point = (Double, Double, Double)
 type Triangle = (Int, Int, Int)
@@ -54,8 +56,6 @@ data Grain = Grain ([Point], [Triangle])
 
 instance Show Grain where
     show g = show (size g) ++ " " ++ show (volume g)
-scalePrototype :: ([Point], [Triangle]) -> Double -> ([Point], [Triangle])
-scalePrototype (ps, ts) s = (map (s *^) ps, ts)
 
 points :: Grain -> [Point]
 points (Grain (ps,_)) = ps
@@ -66,10 +66,10 @@ triangles (Grain (_,ts)) = ts
 scale :: Double -> Grain -> Grain
 scale s (Grain (ps, ts)) = Grain (map (s *^) ps, ts)
 
-readGrainPrototype :: FilePath -> IO ([Point], [Triangle])
-readGrainPrototype file =
+readGrain :: FilePath -> IO Grain
+readGrain file =
     readOffFile file >>= \(ps, ts) ->
-    return (scalePoints $ centerPoints $ map listToTriples ps
+    return $ Grain (scalePoints $ centerPoints $ map listToTriples ps
            , map listToTriples ts)
     where
         -- Move barycenter to Origin.
@@ -87,6 +87,9 @@ readGrainPrototype file =
         listToTriples :: [a] -> (a, a, a)
         listToTriples (x:y:z:_) = (,,) x y z
         listToTriples _ = error "Cannot convert list to triple."
+
+writeGrain :: FilePath -> Grain -> Transformation -> IO ()
+writeGrain f g = writeOffFile f (points g) (triangles g)
 
 -- Size of a grain is defined by second shortest edge length of its bounding
 -- box.
