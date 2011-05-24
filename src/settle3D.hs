@@ -27,9 +27,10 @@ Author: Dmitrij Yu. Naumov
 
 import System.Exit (exitWith, ExitCode(..))
 import Control.Monad (replicateM_, when)
+import Control.Concurrent.MVar (readMVar)
 
 import Grains (readGrain, writeGrain)
-import Simulation (State, makeState, stepSimulation, saveGrains, writeGrainsStatistics, writePovFiles)
+import Simulation (State, makeState, stepSimulation, simulationStep, saveGrains, writeGrainsStatistics)
 
 import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
 import qualified CLI
@@ -38,9 +39,14 @@ import System.Environment (getArgs)
 
 import System.Directory (createDirectory, doesDirectoryExist)
 
+import Text.Printf (printf)
+import Transformation
+import qualified Grains as G (Grain, points, triangles)
+import PovWriter (toPovray)
+
 saveAndExit :: State -> IO ()
 saveAndExit state = do
-    saveGrains state writeGrain
+    saveGrains state grainWriter
     writeGrainsStatistics state $ Config.outputDirectory ++ "/statistics.txt"
     exitWith ExitSuccess
 
@@ -78,8 +84,21 @@ main = do
 
     replicateM_ Config.maxSimulationSteps $ do
         finished <- stepSimulation state
-        when Config.saveEveryStep $ writePovFiles state
+        when Config.saveEveryStep $ do
+            step <- readMVar (simulationStep state)
+            saveGrains state (povWriter step)
         when finished (saveAndExit state)
 
     -- Save results in any case.
     saveAndExit state
+
+povWriter :: Int -> Int -> G.Grain -> Transformation -> IO ()
+povWriter stepI grainJ g = write file . toPovray (G.points g) (G.triangles g)
+    where
+        file = Config.outputDirectory ++ "/grains" ++ printf "%06d" stepI ++ ".mesh"
+        write = if grainJ == 0 then writeFile else appendFile
+
+grainWriter :: Int -> G.Grain -> Transformation -> IO ()
+grainWriter grainJ g = writeGrain file g
+    where
+        file = Config.outputDirectory ++ "/grain" ++ printf "%06d" grainJ

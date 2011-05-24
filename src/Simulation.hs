@@ -25,7 +25,7 @@ module Simulation (
       State(..), makeState
     , stepSimulation
     , prependGrain
-    , saveGrains, writeGrainsStatistics, writePovFiles
+    , saveGrains, writeGrainsStatistics
     , createBCube
     , sandBoxWalls
     ) where
@@ -34,14 +34,11 @@ import Data.VectorSpace
 import BulletFFI
 import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, newMVar)
 
-import Control.Monad (forM_, when, zipWithM_)
+import Control.Monad (when)
 
-import qualified Grains as G (Grain, points, triangles, scale)
+import qualified Grains as G (Grain, points, scale)
 
 import System.Random (Random(randomIO, randomRIO))
-import System.IO
-import Text.Printf (printf)
-import PovWriter (toPovray)
 
 import Transformation
 
@@ -74,22 +71,11 @@ writeGrainsStatistics s f =
     readMVar (grains s) >>= writeFile f . unlines . map show
 
 -- Writes the grains in the current state with grainWriter.
-saveGrains :: State -> (FilePath -> G.Grain -> Transformation -> IO ()) -> IO ()
+saveGrains :: State -> (Int -> G.Grain -> Transformation -> IO ()) -> IO ()
 saveGrains s grainWriter = do
     gs <- readMVar (grains s)
     trans <- readMVar (bodies s) >>= mapM getGrainsTransformation
-    let files = map (\ i -> Config.outputDirectory ++ "/grain" ++ printf "%06d" i) [(0::Int)..]
-    sequence_ (zipWith3 grainWriter files gs trans)
-
-writePovFiles :: State -> IO ()
-writePovFiles s = do
-    i <- readMVar (simulationStep s)
-    gs <- readMVar (grains s)
-    gts <- mapM getGrainsTransformation =<< readMVar (bodies s)
-    let f = Config.outputDirectory ++ "/grains" ++ printf "%06d" i ++ ".mesh"
-
-    withFile f WriteMode (\fh ->
-        zipWithM_ (\ g -> hPutStr fh . toPovray (G.points g) (G.triangles g)) gs gts)
+    sequence_ (zipWith3 grainWriter [0..] gs trans)
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
 getGrainsTransformation b = do
