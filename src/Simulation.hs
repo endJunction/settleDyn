@@ -24,7 +24,6 @@ Author: Dmitrij Yu. Naumov
 module Simulation (
       State(..), makeState
     , stepSimulation
-    , prependGrain
     , saveGrains, writeGrainsStatistics
     , createBCube
     , sandBoxWalls
@@ -32,7 +31,7 @@ module Simulation (
 
 import Data.VectorSpace
 import BulletFFI
-import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, newMVar)
+import Control.Concurrent.MVar (MVar, modifyMVar_, swapMVar, readMVar, newMVar)
 
 import Control.Monad (when)
 
@@ -49,34 +48,40 @@ type Triple a = (a, a, a)
 type Point = Triple Double
 type Tri = Triple Int
 
+-- | A grain is a prototype with local scaling. Its pointer in the simulation is
+-- also stored.
+-- For 'freezing' grains its last moving time is saved.
+data Grain = Grain { prototypeIndex :: Int
+                   , localScale :: Double
+                   , collisionObject :: PlRigidBodyHandle
+                   , lastMovingTime :: Int
+                   }
 
-data State = State {
-        dworld     ::  PlDynamicsWorldHandle
-      , prototypes ::  [Polyhedron]
-      , grainsMovingStep :: MVar [Int]  -- Last simulation step, when grain was moving
-      , grains     ::  MVar [Polyhedron]
-      , bodies :: MVar [PlRigidBodyHandle]
-      , simulationStep :: MVar Int  -- current step
-}
+-- | Create scaled polyhedron from a grain using list of prototypes.
+polyhedron :: [Polyhedron] -> Grain -> Polyhedron
+polyhedron ps g = P.scale (localScale g) (ps !! (prototypeIndex g))
 
-prependGrain :: State -> Polyhedron -> PlRigidBodyHandle -> IO ()
-prependGrain state g b = do
-    modifyMVar_ (grains state) (return . (g:))
-    modifyMVar_ (bodies state) (return . (b:))
-    i <- readMVar (simulationStep state)
-    modifyMVar_ (grainsMovingStep state) (return . (i:))
+grainsInfo :: State -> Grain -> String
+grainsInfo s = show . polyhedron (prototypes s)
+
+data State = State { dworld     ::  PlDynamicsWorldHandle
+                   , prototypes ::  [Polyhedron]
+                   , simulationStep :: MVar Int  -- current step
+                   , grains     ::  MVar [Grain]
+                   }
 
 -- Writes sizes and volumes of grains.
 writeGrainsStatistics :: State -> FilePath -> IO ()
 writeGrainsStatistics s f =
-    readMVar (grains s) >>= writeFile f . unlines . map show
+    readMVar (grains s) >>= writeFile f . unlines . map (grainsInfo s)
 
 -- Writes the grains in the current state with grainWriter.
 saveGrains :: State -> (Int -> Polyhedron -> Transformation -> IO ()) -> IO ()
 saveGrains s grainWriter = do
     gs <- readMVar (grains s)
-    trans <- readMVar (bodies s) >>= mapM getGrainsTransformation
-    sequence_ (zipWith3 grainWriter [0..] gs trans)
+    let polys = map (polyhedron $ prototypes s) gs
+    trans <- mapM (getGrainsTransformation . collisionObject) gs
+    sequence_ (zipWith3 grainWriter [0..] polys trans)
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
 getGrainsTransformation b = do
@@ -91,53 +96,59 @@ getGrainsTransformation b = do
 
 -- Find height of a grain. Height is grains maximum vertical position. Only an
 -- approximate value is needed, so center of mass positions are sufficient.
-getGrainsHeight :: PlRigidBodyHandle -> IO Double
-getGrainsHeight = fmap getVerticalPart . plGetPosition
+getGrainsHeight :: Grain -> IO Double
+getGrainsHeight = fmap getVerticalPart . plGetPosition . collisionObject
     where
         getVerticalPart (_, y, _) = y
+
+computeGrainsHeight :: [(Grain, Bool)] -> IO Double
+computeGrainsHeight =
+    fmap (foldl max 0) . mapM getGrainsHeight . fst . unzip . filter snd
+
+markStaticGrains :: [Grain] -> IO [(Grain, Bool)]
+markStaticGrains gs = do
+    velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject) gs
+        -- Mark static grains with True and static with False
+    let isStatic = map (< Config.movingThreshold) velocities
+    return $ zip gs isStatic
+
+updateLastMovingTime :: [(Grain, Bool)] -> Int -> [Grain]
+updateLastMovingTime gs time =
+    map (\ (g, isStatic) ->
+            if isStatic then g { lastMovingTime = time } else g
+        ) gs
+
+freezeOldStaticGrains :: Int -> [Grain] -> IO Int
+freezeOldStaticGrains time gs = do
+    mapM_ (plMakeRigidBodyStatic . collisionObject) grainsToFreeze
+    return $ length grainsToFreeze
+        where grainsToFreeze = filter ((time >) . lastMovingTime) gs
 
 stepSimulation :: State -> IO Bool
 stepSimulation s = do
     -- Compute next simulation timestep.
     plStepSimulation (dworld s)
     modifyMVar_ (simulationStep s) $ return . (1+)
+
+    velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject)
+        =<< readMVar (grains s)
+    markedGrains <- markStaticGrains =<< readMVar (grains s)
+
+    height <- computeGrainsHeight markedGrains
+
+
+    -- Update simulation time step of moving grains.
     currentStep <- readMVar (simulationStep s)
-
-    bs <- readMVar $ bodies s
-
-    velocities <- mapM (fmap magnitude . plGetVelocity) bs
-    let totalGrains = length bs
-        -- Mark static grains with True and static with False
-        isStatic = map (< Config.movingThreshold) velocities
-
-        nMovingGrains = length $ filter (False ==) isStatic
-
-        -- Select static grains.
-        staticGs = filterBy isStatic bs
-            where
-                filterBy :: [Bool] -> [a] -> [a]
-                filterBy tests = snd . unzip . filter fst . zip tests
-
-    height <- fmap (foldl max 0) $ mapM getGrainsHeight staticGs
-
-    -- Update simulation time step of grainsMovingStep
-    let updateGrainsMovingStep :: [Int] -> [Int]
-        updateGrainsMovingStep oldValues = map
-            (\(static, time) -> if static then time else currentStep)
-            (zip isStatic oldValues)
-
-    modifyMVar_ (grainsMovingStep s) (return . updateGrainsMovingStep)
+    gs <- swapMVar (grains s) $  updateLastMovingTime markedGrains currentStep
 
     -- Freeze grains which are not moving for given number of simulation steps.
-    gms <- readMVar (grainsMovingStep s)
-    let freezeGs = fst $ unzip $ filter
-            ((< currentStep - Config.freezeTimeSteps) . snd) (zip bs gms)
-        nFrozenGrains = length freezeGs
+    nFrozenGrains <-
+        freezeOldStaticGrains (currentStep - Config.freezeTimeSteps) gs
 
-    mapM_ plMakeRigidBodyStatic freezeGs
+    let totalGrains = length gs
+        nMovingGrains = length $ fst $ unzip $ filter (not . snd) markedGrains
 
-        
-    let finished = totalGrains >= Config.maxNumberGrains
+        finished = totalGrains >= Config.maxNumberGrains
             || height > Config.maxGrainsHeight
 
     when (not finished
@@ -168,14 +179,10 @@ makeState ps = do
     mapM_ (createBCube dw) sandBoxWalls
 
     gs <- newMVar []
-    gms <- newMVar []
-    bs <- newMVar []
     step <- newMVar 0
     return State {
         dworld = dw
       , grains = gs
-      , bodies = bs
-      , grainsMovingStep = gms
       , prototypes = ps
       , simulationStep = step
     }
@@ -184,8 +191,8 @@ makeState ps = do
 
 isSpaceGrainFree :: (Point, Double) -> State -> IO Bool
 isSpaceGrainFree (p0, radius) state =
-    readMVar (bodies state) >>=
-    fmap isFree . mapM plGetPosition
+    readMVar (grains state) >>=
+    fmap isFree . mapM (plGetPosition . collisionObject)
     where
         isFree :: [Point] -> Bool
         isFree = all pointIsOutsideSphere
@@ -210,17 +217,27 @@ createNewGrain state height = do
 createNewGrainAt :: State -> (Point, Double) -> IO ()
 createNewGrainAt state (pos, scale) = do
     -- Select prototype.
-    let ps = prototypes state
-    prototype <- randomRIO (0, length ps - 1)
-    let g = P.scale scale $ ps !! prototype
+    i <- randomRIO (0, length (prototypes state) - 1)
 
-    -- Add grain to simulation environment.
-    b <- plPlaceRigidBody (plCreateConvexRigidBody $ P.points g) pos (dworld state)
+    -- Create and add collision object to simulation environment.
+    let createBody = plCreateConvexRigidBody $
+                        P.points $ P.scale scale ((prototypes state) !! i)
+    body <- plPlaceRigidBody createBody pos (dworld state)
+
+    time <- readMVar (simulationStep state)
+    -- Create grain.
+    let g = Grain { prototypeIndex = i
+                  , localScale = scale
+                  , collisionObject = body
+                  , lastMovingTime = time
+                  }
+    -- Prepend grain to state with correct collision Object.
+    modifyMVar_ (grains state) (return . (g:))
+
 
     when (Config.verbose) $ putStr $
-        "new grain size/volume " ++ show g ++ "\n"
+        "new grain size/volume " ++ grainsInfo state g ++ "\n"
 
-    prependGrain state g b
 
 -- Univariate distribution -----------------------------------------------------
 
