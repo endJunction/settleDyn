@@ -36,7 +36,8 @@ import Control.Concurrent.MVar (MVar, modifyMVar_, readMVar, newMVar)
 
 import Control.Monad (when)
 
-import qualified Grains as G (Grain, points, scale)
+import Polyhedron (Polyhedron)
+import qualified Polyhedron as P (points, scale)
 
 import System.Random (Random(randomIO, randomRIO))
 
@@ -51,14 +52,14 @@ type Tri = Triple Int
 
 data State = State {
         dworld     ::  PlDynamicsWorldHandle
-      , prototypes ::  [G.Grain]
+      , prototypes ::  [Polyhedron]
       , grainsMovingStep :: MVar [Int]  -- Last simulation step, when grain was moving
-      , grains     ::  MVar [G.Grain]
+      , grains     ::  MVar [Polyhedron]
       , bodies :: MVar [PlRigidBodyHandle]
       , simulationStep :: MVar Int  -- current step
 }
 
-prependGrain :: State -> G.Grain -> PlRigidBodyHandle -> IO ()
+prependGrain :: State -> Polyhedron -> PlRigidBodyHandle -> IO ()
 prependGrain state g b = do
     modifyMVar_ (grains state) (return . (g:))
     modifyMVar_ (bodies state) (return . (b:))
@@ -71,7 +72,7 @@ writeGrainsStatistics s f =
     readMVar (grains s) >>= writeFile f . unlines . map show
 
 -- Writes the grains in the current state with grainWriter.
-saveGrains :: State -> (Int -> G.Grain -> Transformation -> IO ()) -> IO ()
+saveGrains :: State -> (Int -> Polyhedron -> Transformation -> IO ()) -> IO ()
 saveGrains s grainWriter = do
     gs <- readMVar (grains s)
     trans <- readMVar (bodies s) >>= mapM getGrainsTransformation
@@ -156,7 +157,7 @@ stepSimulation s = do
 
 -------------------------------------------------------------------------------
 
-makeState :: [G.Grain] -> IO State
+makeState :: [Polyhedron] -> IO State
 makeState ps = do
     let worldMin = (minimum . fst . unzip $ sandBoxWalls) ^-^ (1, 1, 1)
         worldMax = (maximum . snd . unzip $ sandBoxWalls) ^+^ (1, 1, 1)
@@ -211,10 +212,10 @@ createNewGrainAt state (pos, scale) = do
     -- Select prototype.
     let ps = prototypes state
     prototype <- randomRIO (0, length ps - 1)
-    let g = G.scale scale $ ps !! prototype
+    let g = P.scale scale $ ps !! prototype
 
     -- Add grain to simulation environment.
-    b <- plPlaceRigidBody (plCreateConvexRigidBody $ G.points g) pos (dworld state)
+    b <- plPlaceRigidBody (plCreateConvexRigidBody $ P.points g) pos (dworld state)
 
     when (Config.verbose) $ putStr $
         "new grain size/volume " ++ show g ++ "\n"

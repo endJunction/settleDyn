@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
-
 {- This file is part of "settle3D" software.
 
 Copyright (C) 2009, 2010, 2011
@@ -23,11 +21,11 @@ Author: Dmitrij Yu. Naumov
 -}
 
 
-module Grains (
-      Grain(..)
+module Polyhedron (
+      Polyhedron
     , Point, Triangle
     , points, triangles
-    , readGrain, writeGrain
+    , readPolyhedron, writePolyhedron
     , getNormal
     , scale
     , size, volume
@@ -52,25 +50,22 @@ getNormal ps (a, b, c) =
         pC = ps !! c
     in normalized $ cross3 (pB ^-^ pA) (pC ^-^ pA)
 
-data Grain = Grain ([Point], [Triangle])
+data Polyhedron = Polyhedron { points :: [Point]
+                             , triangles :: [Triangle]
+                             }
 
-instance Show Grain where
+instance Show Polyhedron where
     show g = show (size g) ++ " " ++ show (volume g)
 
-points :: Grain -> [Point]
-points (Grain (ps,_)) = ps
+scale :: Double -> Polyhedron -> Polyhedron
+scale s p = p { points = map (s *^) (points p) }
 
-triangles :: Grain -> [Triangle]
-triangles (Grain (_,ts)) = ts
-
-scale :: Double -> Grain -> Grain
-scale s (Grain (ps, ts)) = Grain (map (s *^) ps, ts)
-
-readGrain :: FilePath -> IO Grain
-readGrain file =
+readPolyhedron :: FilePath -> IO Polyhedron
+readPolyhedron file =
     readOffFile file >>= \(ps, ts) ->
-    return $ Grain (scalePoints $ centerPoints $ map listToTriples ps
-           , map listToTriples ts)
+    return $ Polyhedron {
+                points = scalePoints $ centerPoints $ map listToTriples ps,
+                triangles = map listToTriples ts }
     where
         -- Move barycenter to Origin.
         centerPoints :: [Point] -> [Point]
@@ -88,21 +83,22 @@ readGrain file =
         listToTriples (x:y:z:_) = (,,) x y z
         listToTriples _ = error "Cannot convert list to triple."
 
-writeGrain :: FilePath -> Grain -> Transformation -> IO ()
-writeGrain f g = writeOffFile f (points g) (triangles g)
+writePolyhedron :: FilePath -> Polyhedron -> Transformation -> IO ()
+writePolyhedron f p = writeOffFile f (points p) (triangles p)
 
--- Size of a grain is defined by second shortest edge length of its bounding
+-- Size of a polyhedron is defined by second shortest edge length of its bounding
 -- box.
-size :: Grain -> Double
-size (Grain (ps, _)) = sizePoints ps
+size :: Polyhedron -> Double
+size = sizePoints . points
 
 sizePoints :: [Point] -> Double
 sizePoints = flip (!!) 1 . sort . edgeLengths
     where edgeLengths = toList . uncurry (flip (^-^)) . bbox
 
-volume :: Grain -> Double
-volume (Grain (ps, ts)) = volumeSurface $ map makeT ts
+volume :: Polyhedron -> Double
+volume p = volumeSurface $ map makeT (triangles p)
     where
+        ps = points p
         makeT (a, b, c) = (ps !! a, ps !! b, ps !! c)
 
 -- Given a convex triangulated surface with the origin in its interior, the

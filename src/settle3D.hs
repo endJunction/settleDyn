@@ -29,7 +29,7 @@ import System.Exit (exitWith, ExitCode(..))
 import Control.Monad (replicateM_, when)
 import Control.Concurrent.MVar (readMVar)
 
-import Grains (readGrain, writeGrain)
+import Polyhedron (Polyhedron, readPolyhedron, writePolyhedron, points, triangles)
 import Simulation (State, makeState, stepSimulation, simulationStep, saveGrains, writeGrainsStatistics)
 
 import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
@@ -41,7 +41,6 @@ import System.Directory (createDirectory, doesDirectoryExist)
 
 import Text.Printf (printf)
 import Transformation
-import qualified Grains as G (Grain, points, triangles)
 import PovWriter (toPovray)
 
 saveAndExit :: State -> IO ()
@@ -68,7 +67,7 @@ main = do
     when (null Config.prototypeFiles) $
         print "No prototype files were given. Exiting."
             >> exitWith (ExitFailure 2)
-    grainPrototypes <- mapM readGrain Config.prototypeFiles
+    grainPrototypes <- mapM readPolyhedron Config.prototypeFiles
 
 
     -- Check output directory and create when necessary.
@@ -92,13 +91,13 @@ main = do
     -- Save results in any case.
     saveAndExit state
 
-povWriter :: Int -> Int -> G.Grain -> Transformation -> IO ()
-povWriter stepI grainJ g = write file . toPovray (G.points g) (G.triangles g)
+povWriter :: Int -> Int -> Polyhedron -> Transformation -> IO ()
+povWriter stepI grainJ p = write file . toPovray (points p) (triangles p)
     where
         file = Config.outputDirectory ++ "/grains" ++ printf "%06d" stepI ++ ".mesh"
         write = if grainJ == 0 then writeFile else appendFile
 
-grainWriter :: Int -> G.Grain -> Transformation -> IO ()
-grainWriter grainJ g = writeGrain file g
+grainWriter :: Int -> Polyhedron -> Transformation -> IO ()
+grainWriter grainJ p = writePolyhedron file p
     where
         file = Config.outputDirectory ++ "/grain" ++ printf "%06d" grainJ
