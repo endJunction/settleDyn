@@ -3,6 +3,9 @@
 Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
+          (C) 2011
+          Dmitrij Yu. Naumov
+
 "Settle3D" is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -45,21 +48,20 @@ module Config (
 
 import Data.IORef
 import System.IO.Unsafe
-import Foreign.C.Types (CFloat)
 
 data Options = Options {
       _freezeTimeSteps :: Int
-    , _generateGrainsOffset :: CFloat
-    , _grainsGenerationBox :: CFloat -- for random x,z position
-    , _grainsSizeMean :: CFloat
-    , _grainsSizeMin :: CFloat
-    , _grainsSizeSlope :: CFloat
+    , _generateGrainsOffset :: Double
+    , _grainsGenerationBox :: Double -- for random x,z position
+    , _grainsSizeMean :: Double
+    , _grainsSizeMin :: Double
+    , _grainsSizeSlope :: Double
     , _grainsSizeGenerator :: String
-    , _maxGrainsHeight :: CFloat
+    , _maxGrainsHeight :: Double
     , _maxMovingGrains :: Int
     , _maxNumberGrains :: Int
     , _maxSimulationSteps :: Int
-    , _movingThreshold :: CFloat
+    , _movingThreshold :: Double
     , _outputDirectory :: String
     , _prototypeFiles :: [FilePath]
     , _verbose :: Bool

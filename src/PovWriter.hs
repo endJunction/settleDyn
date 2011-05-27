@@ -3,6 +3,9 @@
 Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
+          (C) 2011
+          Dmitrij Yu. Naumov
+
 "Settle3D" is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
@@ -27,7 +30,7 @@ module PovWriter (
     ) where
 
 
-import Transformation
+import Geometry
 
 type Triple a = (a, a, a)
 
@@ -42,18 +45,15 @@ showVector as = "<" ++ sV as ++ ">"
           sV' [a] s = {-# SCC "sVsingle" #-} s ++ show a
           sV' (a:b:cs) s = {-# SCC "sVlist" #-} sV' (b:cs) (s `seq` s ++ (show a ++ ", "))
 
-type Point a = Triple a
-type Tri = Triple Int
-
-toPovray :: (Fractional a) => [Point a] -> [Tri] -> Transformation -> String
+toPovray :: [Point] -> [Triangle] -> Transformation -> String
 toPovray ps ts m = unlines $ concat [
     ["mesh2 {"],
     map indent (listOf "vertex_vectors" ps showT),
     map indent (listOf "face_indices" ts showT),
-    ["\tmatrix " ++ showVector (elems m),
+    ["\tmatrix " ++ showVector (getRotTransMatrix m),
      "}"]]
 
-writePovFile :: (Fractional a) => String -> [Point a] -> [Tri] -> Transformation -> IO ()
+writePovFile :: String -> [Point] -> [Triangle] -> Transformation -> IO ()
 writePovFile f ps ts = writeFile (f ++ ".pov") . toPovray ps ts
 
 listOf :: Show a => String -> [a] -> (a -> String) -> [String]

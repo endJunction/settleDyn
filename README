@@ -4,10 +4,13 @@ Copyright  : (C) 2009, 2010, 2011
              Helmholtz Centre Potsdam,
              GFZ German Research Centre for Geosciences.
 
+             (C) 2011
+             Dmitrij Yu. Naumov
+
 License    : This code is released under the GNU General Public License.
 
-Version    : 0.2
-Maintainer : naumov@gfz-potsdam.de
+Version    : 0.3
+Maintainer : settle3D@naumov.de
 
 Author(s)  : Dmitrij Yu. Naumov
 

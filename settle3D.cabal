@@ -1,5 +1,5 @@
 Name:                settle3D
-Version:             0.2
+Version:             0.3
 
 Synopsis:            Sedimentation process simulator for generation of loose
                      sand-like structures.
@@ -11,15 +11,15 @@ Homepage:            git://github.com/endJunction/settle3D.git
 License:             GPL-3
 License-file:        LICENSE
 Author:              Dmitrij Yu. Naumov
-Maintainer:          naumov@gfz-potsdam.de
+Maintainer:          settle3D@naumov.de
 Copyright:           (C) 2009, 2010, 2011 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
+                     (C) 2011 Dmitrij Yu. Naumov
 
 Category:            Scientific Simulation
 Build-type:          Simple
 Cabal-version:       >=1.4
 
-Extra-source-files:  README, data/*.off
-
+Extra-source-files:  README, data/*.off, cbits/bullet.h, cbits/bullet.cpp
 
 
 Executable settle3D
@@ -28,7 +28,6 @@ Executable settle3D
   
     Build-depends:        array
                         , base >= 4 && < 5
-                        , bullet
                         , directory
                         , parsec >= 3 && < 4
                         , random
@@ -36,4 +35,8 @@ Executable settle3D
   
     GHC-Options:        -Wall -funbox-strict-fields
     GHC-Prof-Options:   -Wall -auto-all -caf-all
+
+    C-Sources:          cbits/bullet.cpp
+    Include-Dirs:       cbits, /usr/include/bullet
+    Extra-Libraries:    BulletDynamics LinearMath BulletCollision
 
