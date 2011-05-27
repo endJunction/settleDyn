@@ -160,7 +160,7 @@ stepSimulation s = do
         show totalGrains ++ "\t" ++
         show nMovingGrains ++ "\t" ++
         show nFrozenGrains ++ "\t" ++
-        show (if null velocities then 0.0 else maximum velocities) ++ "\t" ++
+        show (foldl max 0 velocities) ++ "\t" ++
         show height ++ "\n"
 
     return (finished && nMovingGrains == 0)
