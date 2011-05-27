@@ -40,8 +40,8 @@ import System.Environment (getArgs)
 import System.Directory (createDirectory, doesDirectoryExist)
 
 import Text.Printf (printf)
-import Transformation
 import PovWriter (toPovray)
+import Geometry (Transformation)
 
 saveAndExit :: State -> IO ()
 saveAndExit state = do

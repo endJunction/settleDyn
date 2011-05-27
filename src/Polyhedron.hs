@@ -23,7 +23,6 @@ Author: Dmitrij Yu. Naumov
 
 module Polyhedron (
       Polyhedron
-    , Point, Triangle
     , points, triangles
     , readPolyhedron, writePolyhedron
     , getNormal
@@ -33,22 +32,12 @@ module Polyhedron (
 
 import Data.List (sort)
 import Data.VectorSpace
-import Data.Cross (HasCross3(..))
 
-import Transformation
+import Geometry
 
 import OffReader
 import OffWriter
 
-type Point = (Double, Double, Double)
-type Triangle = (Int, Int, Int)
-
-getNormal :: [Point] -> Triangle -> Point
-getNormal ps (a, b, c) =
-    let pA = ps !! a
-        pB = ps !! b
-        pC = ps !! c
-    in normalized $ cross3 (pB ^-^ pA) (pC ^-^ pA)
 
 data Polyhedron = Polyhedron { points :: [Point]
                              , triangles :: [Triangle]
@@ -71,10 +60,6 @@ readPolyhedron file =
         centerPoints :: [Point] -> [Point]
         centerPoints ps = map (^-^ barycenter ps) ps
 
-        barycenter :: [Point] -> Point
-        barycenter ps = sumV ps ^/ n
-            where n = fromIntegral $ length ps
-
         -- Scale points, such that the resulting set has size 1.
         scalePoints :: [Point] -> [Point]
         scalePoints ps = map (^/ sizePoints ps) ps
@@ -92,47 +77,18 @@ size :: Polyhedron -> Double
 size = sizePoints . points
 
 sizePoints :: [Point] -> Double
-sizePoints = flip (!!) 1 . sort . edgeLengths
-    where edgeLengths = toList . uncurry (flip (^-^)) . bbox
+sizePoints [] = 0
+sizePoints ps =
+    case bbox ps of
+        Nothing -> 0
+        Just box -> flip (!!) 1 $ sort $ edgeLengths box
+    where edgeLengths = toList . uncurry (flip (^-^))
 
 volume :: Polyhedron -> Double
-volume p = volumeSurface $ map makeT (triangles p)
-    where
-        ps = points p
-        makeT (a, b, c) = (ps !! a, ps !! b, ps !! c)
+volume p = volumeSurface $ map (triangleCoordinates (points p)) $ triangles p
 
 -- Given a convex triangulated surface with the origin in its interior, the
 -- enclosed volume is the sum of tetrahedrons' volumes from origin to the
 -- surface triangles.
 volumeSurface :: [(Point, Point, Point)] -> Double
-volumeSurface = foldl (flip $ (+) . volumeTet) 0
-
--- To calculate a volume enclosed by a convex triangulated surface, we need a
--- volume of a single tetrahedron. Assume, one of tetrahedron's vertices lies in
--- origin, and denote the other by /pA/, /pB/ and /pC/. Then its volume is given
--- by:
-
-volumeTet :: (Point, Point, Point) -> Double
-volumeTet (a, b, c) = 1/6 * abs (a <.> (b `cross3` c))
-
--- Bbox -----------------------------------------------------------------------
-
-type Bbox = (Point, Point)
-
-bbox :: [Point] -> Bbox
-bbox ps = (minAll ps, maxAll ps)
-    where
-      minAll, maxAll :: [Point] -> Point
-      minAll = foldl1 minV
-      maxAll = foldl1 maxV
-
--- Operations on points -------------------------------------------------------
-
-toList :: Point -> [Double]
-toList (x, y, z) = [x, y, z]
-
-minV :: Point -> Point -> Point
-minV (ax, ay, az) (bx, by, bz) = (min ax bx, min ay by, min az bz)
-maxV :: Point -> Point -> Point
-maxV (ax, ay, az) (bx, by, bz) = (max ax bx, max ay by, max az bz)
-
+volumeSurface = foldl (flip $ (+) . volumeTetO) 0

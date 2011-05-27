@@ -29,7 +29,6 @@ module Simulation (
     , sandBoxWalls
     ) where
 
-import Data.VectorSpace
 import BulletFFI
 import Control.Concurrent.MVar (MVar, modifyMVar_, swapMVar, readMVar, newMVar)
 
@@ -40,13 +39,9 @@ import qualified Polyhedron as P (points, scale)
 
 import System.Random (Random(randomIO, randomRIO))
 
-import Transformation
+import Geometry
 
 import qualified Config
-
-type Triple a = (a, a, a)
-type Point = Triple Double
-type Tri = Triple Int
 
 -- | A grain is a prototype with local scaling. Its pointer in the simulation is
 -- also stored.
@@ -84,13 +79,7 @@ saveGrains s grainWriter = do
     sequence_ (zipWith3 grainWriter [0..] polys trans)
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
-getGrainsTransformation b = do
-    [ax,ay,az,_,bx,by,bz,_,cx,cy,cz,_,tx,ty,tz,_] <- plGetOpenGLMatrix b
-    return $ array ((0,0), (3,2)) [
-        ((0,0), ax), ((0,1), ay), ((0,2), az),
-        ((1,0), bx), ((1,1), by), ((1,2), bz),
-        ((2,0), cx), ((2,1), cy), ((2,2), cz),
-        ((3,0), tx), ((3,1), ty), ((3,2), tz) ]
+getGrainsTransformation b = fmap fromOpenGLMatrix $ plGetOpenGLMatrix b
     
 -------------------------------------------------------------------------------
 
@@ -190,16 +179,12 @@ makeState ps = do
 -------------------------------------------------------------------------------
 
 isSpaceGrainFree :: (Point, Double) -> State -> IO Bool
-isSpaceGrainFree (p0, radius) state =
+isSpaceGrainFree sphere state =
     readMVar (grains state) >>=
     fmap isFree . mapM (plGetPosition . collisionObject)
     where
         isFree :: [Point] -> Bool
-        isFree = all pointIsOutsideSphere
-
-        pointIsOutsideSphere :: Point -> Bool
-        pointIsOutsideSphere = (radius <) . magnitude . (p0 ^-^)
-
+        isFree = all (pointIsOutsideSphere sphere)
 
 createNewGrain :: State -> Double -> IO ()
 createNewGrain state height = do
