@@ -3,6 +3,9 @@
 Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
+          (C) 2011
+          Dmitrij Yu. Naumov
+
 "Settle3D" is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
