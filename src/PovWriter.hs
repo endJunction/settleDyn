@@ -30,31 +30,28 @@ module PovWriter (
     ) where
 
 
+import Data.List (intercalate)
 import Geometry
 
 type Triple a = (a, a, a)
 
-showT :: (Show a) => Triple a -> String
-showT (x, y, z) = "<" ++ show x ++ ", " ++ show y ++ ", " ++ show z ++ ">"
+showTriple :: (Show a) => Triple a -> String
+showTriple (x, y, z) = showVector [x,y,z]
 
 showVector :: (Show a) => [a] -> String
 showVector as = "<" ++ sV as ++ ">"
-    where sV xs = sV' xs ""
-          sV' :: (Show a) => [a] -> String -> String
-          sV' [] s = s
-          sV' [a] s = {-# SCC "sVsingle" #-} s ++ show a
-          sV' (a:b:cs) s = {-# SCC "sVlist" #-} sV' (b:cs) (s `seq` s ++ (show a ++ ", "))
+    where sV = intercalate ", " . map show
 
-toPovray :: [Point] -> [Triangle] -> Transformation -> String
-toPovray ps ts m = unlines $ concat [
+toPovray :: [Point] -> [Triangle] -> String
+toPovray ps ts = unlines $ concat [
     ["mesh2 {"],
-    map indent (listOf "vertex_vectors" ps showT),
-    map indent (listOf "face_indices" ts showT),
-    ["\tmatrix " ++ showVector (getRotTransMatrix m),
-     "}"]]
+    listOfTriples "vertex_vectors" ps,
+    listOfTriples "face_indices" ts,
+    ["}"]]
+    where listOfTriples name xs = map indent $ listOf name xs showTriple
 
-writePovFile :: String -> [Point] -> [Triangle] -> Transformation -> IO ()
-writePovFile f ps ts = writeFile (f ++ ".pov") . toPovray ps ts
+writePovFile :: FilePath -> [Point] -> [Triangle] -> IO ()
+writePovFile f ps = writeFile (f ++ ".pov") . toPovray ps
 
 listOf :: Show a => String -> [a] -> (a -> String) -> [String]
 listOf name vector printer = concat

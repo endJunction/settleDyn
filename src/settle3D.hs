@@ -29,11 +29,13 @@ Author: Dmitrij Yu. Naumov
 -}
 
 import System.Exit (exitWith, ExitCode(..))
-import Control.Monad (replicateM_, when)
+import Control.Monad (replicateM_, when, zipWithM_)
 import Control.Concurrent.MVar (readMVar)
 
-import Polyhedron (Polyhedron, readPolyhedron, writePolyhedron, points, triangles)
-import Simulation (State, makeState, stepSimulation, simulationStep, saveGrains, writeGrainsStatistics)
+import Polyhedron (Polyhedron, readPolyhedron, points, triangles)
+import Geometry (Point, Triangle)
+
+import Simulation (State, makeState, stepSimulation, simulationStep, mapGrains, writeGrainsStatistics)
 
 import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
 import qualified CLI
@@ -44,11 +46,11 @@ import System.Directory (createDirectory, doesDirectoryExist)
 
 import Text.Printf (printf)
 import PovWriter (toPovray)
-import Geometry (Transformation)
+import OffWriter (toGeomviewOFF)
 
 saveAndExit :: State -> IO ()
 saveAndExit state = do
-    saveGrains state grainWriter
+    mapGrains state offWriter
     writeGrainsStatistics state $ Config.outputDirectory ++ "/statistics.txt"
     exitWith ExitSuccess
 
@@ -88,19 +90,23 @@ main = do
         finished <- stepSimulation state
         when Config.saveEveryStep $ do
             step <- readMVar (simulationStep state)
-            saveGrains state (povWriter step)
+            mapGrains state (povWriter step)
         when finished (saveAndExit state)
 
     -- Save results in any case.
     saveAndExit state
 
-povWriter :: Int -> Int -> Polyhedron -> Transformation -> IO ()
-povWriter stepI grainJ p = write file . toPovray (points p) (triangles p)
+povWriter :: Int -> [Polyhedron] -> IO ()
+povWriter i ps = writeFile file $ concat $ map (convert toPovray) ps
     where
-        file = Config.outputDirectory ++ "/grains" ++ printf "%06d" stepI ++ ".mesh"
-        write = if grainJ == 0 then writeFile else appendFile
+        file = Config.outputDirectory ++ "/step" ++ printf "%06d" i ++ ".mesh"
 
-grainWriter :: Int -> Polyhedron -> Transformation -> IO ()
-grainWriter grainJ p = writePolyhedron file p
+offWriter :: [Polyhedron] -> IO ()
+offWriter ps = zipWithM_ (\ i s -> writeFile (file i) s) [0..] $
+    map (convert toGeomviewOFF) ps
     where
-        file = Config.outputDirectory ++ "/grain" ++ printf "%06d" grainJ
+        file :: Int -> String
+        file i = Config.outputDirectory ++ "/grain" ++ printf "%06d" i ++ ".off"
+
+convert :: ([Point] -> [Triangle] -> String) -> Polyhedron -> String
+convert c p = c (points p) (triangles p)

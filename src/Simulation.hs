@@ -27,7 +27,7 @@ Author: Dmitrij Yu. Naumov
 module Simulation (
       State(..), makeState
     , stepSimulation
-    , saveGrains, writeGrainsStatistics
+    , mapGrains, writeGrainsStatistics
     , createBCube
     , sandBoxWalls
     ) where
@@ -38,7 +38,7 @@ import Control.Concurrent.MVar (MVar, modifyMVar_, swapMVar, readMVar, newMVar)
 import Control.Monad (when)
 
 import Polyhedron (Polyhedron)
-import qualified Polyhedron as P (points, scale)
+import qualified Polyhedron as P (points, scale, transform)
 
 import System.Random (Random(randomIO, randomRIO))
 
@@ -73,13 +73,14 @@ writeGrainsStatistics :: State -> FilePath -> IO ()
 writeGrainsStatistics s f =
     readMVar (grains s) >>= writeFile f . unlines . map (grainsInfo s)
 
--- Writes the grains in the current state with grainWriter.
-saveGrains :: State -> (Int -> Polyhedron -> Transformation -> IO ()) -> IO ()
-saveGrains s grainWriter = do
-    gs <- readMVar (grains s)
-    let polys = map (polyhedron $ prototypes s) gs
-    trans <- mapM (getGrainsTransformation . collisionObject) gs
-    sequence_ (zipWith3 grainWriter [0..] polys trans)
+-- Calls given function on list of transformed polyhedrons.
+mapGrains :: State -> ([Polyhedron] -> IO ()) -> IO ()
+mapGrains s f =
+    readMVar (grains s)
+    >>= mapM (\ g -> do -- Make transformed polyhedron from grain.
+        t <- getGrainsTransformation $ collisionObject g
+        return $ P.transform t $ polyhedron (prototypes s) g)
+    >>= f
 
 getGrainsTransformation :: PlRigidBodyHandle -> IO Transformation
 getGrainsTransformation b = fmap fromOpenGLMatrix $ plGetOpenGLMatrix b

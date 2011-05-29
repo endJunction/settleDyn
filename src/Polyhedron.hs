@@ -27,19 +27,20 @@ Author: Dmitrij Yu. Naumov
 module Polyhedron (
       Polyhedron
     , points, triangles
-    , readPolyhedron, writePolyhedron
+    , readPolyhedron
     , getNormal
     , scale
     , size, volume
+    , transform
     ) where
 
 import Data.List (sort)
 import Data.VectorSpace
 
-import Geometry
+import Geometry hiding (transform)
+import qualified Geometry as Geom (transform)
 
 import OffReader
-import OffWriter
 
 
 data Polyhedron = Polyhedron { points :: [Point]
@@ -48,6 +49,9 @@ data Polyhedron = Polyhedron { points :: [Point]
 
 instance Show Polyhedron where
     show g = show (size g) ++ " " ++ show (volume g)
+
+transform :: Transformation -> Polyhedron -> Polyhedron
+transform t p = p { points = map (Geom.transform t) (points p) }
 
 scale :: Double -> Polyhedron -> Polyhedron
 scale s p = p { points = map (s *^) (points p) }
@@ -70,9 +74,6 @@ readPolyhedron file =
         listToTriples :: [a] -> (a, a, a)
         listToTriples (x:y:z:_) = (,,) x y z
         listToTriples _ = error "Cannot convert list to triple."
-
-writePolyhedron :: FilePath -> Polyhedron -> Transformation -> IO ()
-writePolyhedron f p = writeOffFile f (points p) (triangles p)
 
 -- Size of a polyhedron is defined by second shortest edge length of its bounding
 -- box.
