@@ -251,7 +251,7 @@ bivariate (k, l, m) y
 -- The inverse cumulative density function of Weibull distribution takes three
 -- parameters:
 --  - k is the form parameter,
---  - l is the magnitude and
+--  - l-m is the magnitude and
 --  - m is the shift parameter.
 
 icfdWeibull :: (RealFloat a) => (a, a, a) -> a -> a
