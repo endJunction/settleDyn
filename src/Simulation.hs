@@ -125,21 +125,21 @@ stepSimulation s = do
 
     velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject)
         =<< readMVar (grains s)
-    markedGrains <- markStaticGrains =<< readMVar (grains s)
+    staticGrains <- markStaticGrains =<< readMVar (grains s)
 
-    height <- computeGrainsHeight markedGrains
+    height <- computeGrainsHeight staticGrains
 
 
     -- Update simulation time step of moving grains.
     currentStep <- readMVar (simulationStep s)
-    gs <- swapMVar (grains s) $  updateLastMovingTime markedGrains currentStep
+    gs <- swapMVar (grains s) $  updateLastMovingTime staticGrains currentStep
 
     -- Freeze grains which are not moving for given number of simulation steps.
     nFrozenGrains <-
         freezeOldStaticGrains (currentStep - Config.freezeTimeSteps) gs
 
     let totalGrains = length gs
-        nMovingGrains = length $ fst $ unzip $ filter (not . snd) markedGrains
+        nMovingGrains = length $ fst $ unzip $ filter (not . snd) staticGrains
 
         finished = totalGrains >= Config.maxNumberGrains
             || height > Config.maxGrainsHeight
