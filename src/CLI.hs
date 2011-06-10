@@ -71,8 +71,8 @@ optionProcessor =
         ("The shape parameter of the Weibull\n" ++
         "distribution for grains' sizes.")
     , Option "d" ["distribution"]
-        (ReqArg (\s o -> o { _grainsSizeGenerator = s }) "{univariate|bivariate|weibull}")
-        "Grain size distribution"
+        (ReqArg (\s o -> o { _grainsSizeGenerator = s }) "Distribution")
+        "Grain size distribution, where Distribution = {univariate|bivariate|weibull}"
     , Option "o" ["output"]
         (ReqArg (\s o -> o { _outputDirectory = s }) "Path")
         "Save results in this directory."
