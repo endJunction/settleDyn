@@ -117,6 +117,9 @@ optionProcessor =
     , Option "" ["saveEvery"]
         (NoArg (\o -> o { _saveEveryStep = True }))
         "Save grains' positions every step."
+    , Option "" ["exportLast"]
+        (NoArg (\o -> o { _exportLastStep = True }))
+        "Export grains when finishing simulation."
     ]
 
 parseOptions :: Options -> [String] -> IO Options

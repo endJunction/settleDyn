@@ -37,7 +37,7 @@ import Geometry (Point, Triangle)
 
 import Simulation (State, makeState, stepSimulation, simulationStep, mapGrains, writeGrainsStatistics)
 
-import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep)
+import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep, exportLastStep)
 import qualified CLI
 
 import System.Environment (getArgs)
@@ -52,6 +52,11 @@ saveAndExit :: State -> IO ()
 saveAndExit state = do
     mapGrains state offWriter
     writeGrainsStatistics state $ Config.outputDirectory ++ "/statistics.txt"
+
+    when Config.exportLastStep $ do
+        step <- readMVar (simulationStep state)
+        mapGrains state (povWriter step)
+
     exitWith ExitSuccess
 
 main :: IO ()

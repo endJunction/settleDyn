@@ -42,6 +42,7 @@ module Config (
     , verbose
     , showHelp
     , saveEveryStep
+    , exportLastStep
     , setOptions, getOptions
     , Options(..)
     ) where
@@ -67,6 +68,7 @@ data Options = Options {
     , _verbose :: Bool
     , _showHelp :: Bool
     , _saveEveryStep :: Bool
+    , _exportLastStep :: Bool
     } deriving Show
 
 getOptions :: IO Options
@@ -97,6 +99,7 @@ defaultOptions = Options {
     , _verbose = False
     , _showHelp = False
     , _saveEveryStep = False
+    , _exportLastStep = False
     }
 
 freezeTimeSteps = _freezeTimeSteps $ unsafePerformIO getOptions
@@ -116,3 +119,4 @@ prototypeFiles = _prototypeFiles $ unsafePerformIO getOptions
 verbose = _verbose $ unsafePerformIO getOptions
 showHelp = _showHelp $ unsafePerformIO getOptions
 saveEveryStep = _saveEveryStep $ unsafePerformIO getOptions
+exportLastStep = _exportLastStep $ unsafePerformIO getOptions
