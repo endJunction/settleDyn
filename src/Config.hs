@@ -41,7 +41,7 @@ module Config (
     , prototypeFiles
     , verbose
     , showHelp
-    , saveEveryStep
+    , exportEveryStep
     , exportLastStep
     , setOptions, getOptions
     , Options(..)
@@ -67,7 +67,7 @@ data Options = Options {
     , _prototypeFiles :: [FilePath]
     , _verbose :: Bool
     , _showHelp :: Bool
-    , _saveEveryStep :: Bool
+    , _exportEveryStep :: Bool
     , _exportLastStep :: Bool
     } deriving Show
 
@@ -98,7 +98,7 @@ defaultOptions = Options {
     , _prototypeFiles = []
     , _verbose = False
     , _showHelp = False
-    , _saveEveryStep = False
+    , _exportEveryStep = False
     , _exportLastStep = False
     }
 
@@ -118,5 +118,5 @@ outputDirectory = _outputDirectory $ unsafePerformIO getOptions
 prototypeFiles = _prototypeFiles $ unsafePerformIO getOptions
 verbose = _verbose $ unsafePerformIO getOptions
 showHelp = _showHelp $ unsafePerformIO getOptions
-saveEveryStep = _saveEveryStep $ unsafePerformIO getOptions
+exportEveryStep = _exportEveryStep $ unsafePerformIO getOptions
 exportLastStep = _exportLastStep $ unsafePerformIO getOptions

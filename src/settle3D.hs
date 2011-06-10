@@ -37,7 +37,7 @@ import Geometry (Point, Triangle)
 
 import Simulation (State, makeState, stepSimulation, simulationStep, mapGrains, writeGrainsStatistics)
 
-import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, saveEveryStep, exportLastStep)
+import qualified Config (setOptions, getOptions, maxSimulationSteps, outputDirectory, prototypeFiles, verbose, showHelp, exportEveryStep, exportLastStep)
 import qualified CLI
 
 import System.Environment (getArgs)
@@ -93,7 +93,7 @@ main = do
 
     replicateM_ Config.maxSimulationSteps $ do
         finished <- stepSimulation state
-        when Config.saveEveryStep $ do
+        when Config.exportEveryStep $ do
             step <- readMVar (simulationStep state)
             mapGrains state (povWriter step)
         when finished (saveAndExit state)
