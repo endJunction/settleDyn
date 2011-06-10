@@ -44,9 +44,12 @@ showVector as = "<" ++ sV as ++ ">"
 
 toPovray :: [Point] -> [Triangle] -> String
 toPovray ps ts = unlines $ concat [
-    ["mesh2 {"],
+    ["object {"],
+    ["\tmesh2 {"],
     listOfTriples "vertex_vectors" ps,
     listOfTriples "face_indices" ts,
+    ["\t}"],
+    ["\t texture { GrainTexture }"],
     ["}"]]
     where listOfTriples name xs = map indent $ listOf name xs showTriple
 
