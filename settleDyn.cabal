@@ -1,17 +1,17 @@
-Name:                settle3D
-Version:             0.3.0.1
+Name:                settleDyn
+Version:             0.3.0.2
 
 Synopsis:            Sedimentation process simulator for generation of loose
                      sand-like structures.
-Description:         Settle3D is a sedimentation process simulator.  It is
+Description:         settleDyn is a sedimentation process simulator.  It is
                      capable of generating loose sand-like structures from given
                      particle forms and statistical distributions.
   
-Homepage:            git://github.com/endJunction/settle3D.git
+Homepage:            git://github.com/endJunction/settleDyn.git
 License:             GPL-3
 License-file:        LICENSE
 Author:              Dmitrij Yu. Naumov
-Maintainer:          settle3D@naumov.de
+Maintainer:          settleDyn@naumov.de
 Copyright:           (C) 2009, 2010, 2011 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
                      (C) 2011 Dmitrij Yu. Naumov
 
@@ -22,9 +22,9 @@ Cabal-version:       >=1.4
 Extra-source-files:  README, data/*.off, cbits/bullet.h, cbits/bullet.cpp
 
 
-Executable settle3D
+Executable settleDyn
     HS-source-dirs:     src
-    Main-is:            settle3D.hs
+    Main-is:            settleDyn.hs
   
     Build-depends:        array
                         , base >= 4 && < 5

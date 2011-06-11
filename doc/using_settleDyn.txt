@@ -101,7 +101,7 @@ The following command line arguments describe common scenarios.
 *One grain shape (prototype.off) with constant size 1.23.*  Setting the grain
 size minimum and mean to same values result in only one grain size.
 
-> settle3D -p prototype.off -m 1.23
+> settleDyn -p prototype.off -m 1.23
 
 *One grain shape with Weibull-distributed grain sizes with mean 1.0 and minimum 0.5*
 Let the slope parameter k of the Weibull distribution be 3.0 (default value),
@@ -111,7 +111,7 @@ and of the shifted it is
 minimum + mu ~= 0.5 + l * 0.89338,
 which should be 1.0, i.e. l ~= 0.55967.
 
-> settle3D -p prototype.off -d "weibull" -m 0.5 -l 0.55967
+> settleDyn -p prototype.off -d "weibull" -m 0.5 -l 0.55967
 
 The variance of the non-shifted Weibull distribution is
 sigma^2 = L^2 (Gamma(1+2/k) - Gamma^2(1+1/k)). In this example it is
@@ -120,5 +120,5 @@ sigma ~= 0.18
 *Two shapes (s1.off, s2.off) of constant size 1.0 containing 25% of first and
 75% of the second shape.* Specify the second shape three times.
 
-> settle3D -p s1.off -p s2.off -p s2.off -p s2.off -m 1
+> settleDyn -p s1.off -p s2.off -p s2.off -p s2.off -m 1
 

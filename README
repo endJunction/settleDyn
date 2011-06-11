@@ -1,5 +1,5 @@
 
-Programm   : settle3D---a sedimentation process simulator.
+Programm   : settleDyn---a sedimentation process simulator.
 Copyright  : (C) 2009, 2010, 2011
              Helmholtz Centre Potsdam,
              GFZ German Research Centre for Geosciences.
@@ -9,8 +9,8 @@ Copyright  : (C) 2009, 2010, 2011
 
 License    : This code is released under the GNU General Public License.
 
-Version    : 0.3.0.1
-Maintainer : settle3D@naumov.de
+Version    : 0.3.0.2
+Maintainer : settleDyn@naumov.de
 
 Author(s)  : Dmitrij Yu. Naumov
 
@@ -18,11 +18,11 @@ Author(s)  : Dmitrij Yu. Naumov
 Description
 -----------
 
-"Settle3D" is a sedimentation process simulator.  It is capable of generating
+"settleDyn" is a sedimentation process simulator.  It is capable of generating
 loose sand-like structures from given particle forms and statistical
 distributions.
 
-This software is a complete rewrite of the settle3D program written by Guido
+This software is a complete rewrite of the Settle3D program written by Guido
 Blöcher. See corresponding paper for further details:
     Blöcher, G. and Zimmermann, G. 2008. Settle3D-A numerical generator for
       artificial porous media. Comput. Geosci. 34, 12 (Dec. 2008), 1827-1842.
@@ -32,7 +32,7 @@ The complete sedimentation process including diagenesis involves many processes
 on variing time and space scales. The first step in sandstone formation is
 deposition of grains. This process can be simulated with current software.
 Cementation and further compactification or any other diagenetic processes
-cannot be simulated with settle3D.
+cannot be simulated with settleDyn.
 
 Simulation process starts with definition of grain shapes and grain size
 distributions. The shapes are polyhedral descriptions read from files in

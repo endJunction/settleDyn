@@ -1,4 +1,4 @@
-{- This file is part of "settle3D" software.
+{- This file is part of "settleDyn" software.
 
 Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
@@ -6,17 +6,17 @@ Copyright (C) 2009, 2010, 2011
           (C) 2011
           Dmitrij Yu. Naumov
 
-"Settle3D" is free software: you can redistribute it and/or modify it under
+"settleDyn" is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
 version.
 
-"Settle3D" is distributed in the hope that it will be useful, but WITHOUT ANY
+"settleDyn" is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-"settle3D".  If not, see <http://www.gnu.org/licenses/>.
+"settleDyn".  If not, see <http://www.gnu.org/licenses/>.
 
 
 Author: Dmitrij Yu. Naumov
@@ -39,7 +39,7 @@ helpMessage = usageInfo header optionProcessor
     where
     header = unlines $
         [ ""
-        , "Settle3D---a sedimentation process simulator."
+        , "settleDyn---a sedimentation process simulator."
         , ""
         , "Copyright (C) 2009 - 2011 Dmitrij Yu. Naumov, GFZ-Potsdam."
         , "This program comes with ABSOLUTELY NO WARRANTY;  This is"
@@ -47,7 +47,7 @@ helpMessage = usageInfo header optionProcessor
         , "certain conditions;  For details see the LICENSE file."
         , ""
         , ""
-        , "Usage: 'settle3D {--prototype=file, ...} [options]'"
+        , "Usage: 'settleDyn {--prototype=file, ...} [options]'"
         , ""
         , "Valid options are:"
         ]

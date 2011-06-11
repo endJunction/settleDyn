@@ -1,6 +1,6 @@
 {-
 
-"Settle3D" is a sedimentation process simulator.  It is capable to generate
+"settleDyn" is a sedimentation process simulator.  It is capable to generate
 loose-sand--like structures from given particle forms and statistical
 distributions.
 
