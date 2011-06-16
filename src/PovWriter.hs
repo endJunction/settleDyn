@@ -25,8 +25,7 @@ Author: Dmitrij Yu. Naumov
 
 
 module PovWriter (
-      writePovFile
-    , toPovray
+      toPovray
     ) where
 
 
@@ -53,8 +52,6 @@ toPovray ps ts = unlines $ concat [
     ["}"]]
     where listOfTriples name xs = map indent $ listOf name xs showTriple
 
-writePovFile :: FilePath -> [Point] -> [Triangle] -> IO ()
-writePovFile f ps = writeFile (f ++ ".pov") . toPovray ps
 
 listOf :: Show a => String -> [a] -> (a -> String) -> [String]
 listOf name vector printer = concat
