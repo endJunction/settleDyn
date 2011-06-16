@@ -113,5 +113,5 @@ offWriter ps = zipWithM_ (\ i s -> writeFile (file i) s) [0..] $
         file :: Int -> String
         file i = Config.outputDirectory ++ "/grain" ++ printf "%06d" i ++ ".off"
 
-convert :: ([Point] -> [Triangle] -> String) -> Polyhedron -> String
+convert :: ([Point] -> [Triangle] -> a) -> Polyhedron -> a
 convert c p = c (points p) (triangles p)
