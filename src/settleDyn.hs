@@ -102,7 +102,7 @@ main = do
     saveAndExit state
 
 povWriter :: Int -> [Polyhedron] -> IO ()
-povWriter i ps = writeFile file $ concat $ map (convert toPovray) ps
+povWriter i ps = writeFile file $ toPovray $ map (convert (,)) ps
     where
         file = Config.outputDirectory ++ "/step" ++ printf "%06d" i ++ ".mesh"
 

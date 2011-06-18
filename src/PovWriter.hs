@@ -41,17 +41,29 @@ showVector :: (Show a) => [a] -> String
 showVector as = "<" ++ sV as ++ ">"
     where sV = intercalate ", " . map show
 
-toPovray :: [Point] -> [Triangle] -> String
-toPovray ps ts = unlines $ concat [
-    ["object {"],
-    ["\tmesh2 {"],
+-- | Convert a polyhedron to mesh2 povray object.
+polyToMesh2 :: [Point] -> [Triangle] -> [String]
+polyToMesh2 ps ts = concat [
+    ["mesh2 {"],
     listOfTriples "vertex_vectors" ps,
     listOfTriples "face_indices" ts,
-    ["\t}"],
-    ["\t texture { GrainTexture }"],
+    [indent "inside_vector z"],
     ["}"]]
     where listOfTriples name xs = map indent $ listOf name xs showTriple
 
+-- | Convert a list of polyhedrons to an array of mesh2 povray objects. Also
+-- writes length of array. Declare NPolys and Polys.
+toPovray :: [([Point], [Triangle])] -> String
+toPovray ps = unlines
+    [ "#declare NPolys = " ++ show n ++ ";"
+    , "#declare Polys = array[" ++ show n ++ "] {"
+    , unlines $ povrayMeshes
+    , "}"
+    ]
+    where
+        n = length ps
+        povrayMeshes :: [String]
+        povrayMeshes = intercalate [","] $ map (uncurry polyToMesh2) ps
 
 listOf :: Show a => String -> [a] -> (a -> String) -> [String]
 listOf name vector printer = concat
