@@ -7,7 +7,7 @@ Description:         settleDyn is a sedimentation process simulator.  It is
                      capable of generating loose sand-like structures from given
                      particle forms and statistical distributions.
   
-Homepage:            git://github.com/endJunction/settleDyn.git
+Homepage:            http://settleDyn.naumov.de
 License:             GPL-3
 License-file:        LICENSE
 Author:              Dmitrij Yu. Naumov
