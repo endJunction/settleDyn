@@ -5,3 +5,4 @@ out/
 *.hi-boot
 *.o-boot
 dist/
+cabal-dev/
