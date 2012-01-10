@@ -108,7 +108,7 @@ markStaticGrains gs = do
 updateLastMovingTime :: [(Grain, Bool)] -> Int -> [Grain]
 updateLastMovingTime gs time =
     map (\ (g, isStatic) ->
-            if isStatic then g { lastMovingTime = time } else g
+            if isStatic then g else g { lastMovingTime = time }
         ) gs
 
 freezeOldStaticGrains :: Int -> [Grain] -> IO Int
