@@ -101,7 +101,7 @@ computeGrainsHeight =
 markStaticGrains :: [Grain] -> IO [(Grain, Bool)]
 markStaticGrains gs = do
     velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject) gs
-        -- Mark static grains with True and static with False
+        -- Mark static grains with True and moving with False
     let isStatic = map (< Config.movingThreshold) velocities
     return $ zip gs isStatic
 
