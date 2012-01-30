@@ -33,7 +33,7 @@ Executable settleDyn
                         , random
                         , vector-space
   
-    GHC-Options:        -Wall -funbox-strict-fields
+    GHC-Options:        -Wall -funbox-strict-fields -lstdc++
     GHC-Prof-Options:   -Wall -auto-all -caf-all
 
     C-Sources:          cbits/bullet.cpp
