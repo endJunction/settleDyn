@@ -78,7 +78,7 @@ void	plStepSimulation(plDynamicsWorldHandle world,	plReal	timeStep)
 {
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
-	dynamicsWorld->stepSimulation(timeStep);
+	dynamicsWorld->stepSimulation(timeStep, 0);
 }
 
 void plAddRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)

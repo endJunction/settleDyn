@@ -71,8 +71,8 @@ foreign import ccall safe "plCreateDynamicsWorld" plCreateDynamicsWorld_
 --
 -- Step simulation.
 --
-plStepSimulation :: PlDynamicsWorldHandle -> IO ()
-plStepSimulation dw = plStepSimulation_ dw 1.0
+plStepSimulation :: PlDynamicsWorldHandle -> Double -> IO ()
+plStepSimulation dw dt = plStepSimulation_ dw $ realToFrac dt
 
 foreign import ccall safe "plStepSimulation" plStepSimulation_
     :: PlDynamicsWorldHandle -> CFloat -> IO ()

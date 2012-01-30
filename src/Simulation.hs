@@ -112,19 +112,38 @@ updateLastMovingTime gs time =
         ) gs
 
 freezeOldStaticGrains :: Int -> [Grain] -> IO Int
-freezeOldStaticGrains time gs = do
+freezeOldStaticGrains age gs = do
     mapM_ (plMakeRigidBodyStatic . collisionObject) grainsToFreeze
     return $ length grainsToFreeze
-        where grainsToFreeze = filter ((time >) . lastMovingTime) gs
+        where grainsToFreeze = filter ((age >) . lastMovingTime) gs
+
+-- Simulation time step is choosen, such that maximum travel distance is less
+-- than the maxTravelDistance
+maxTravelDistance :: Double
+maxTravelDistance = 0.05
+
+timeStep :: [Double] -> Double
+timeStep vs = max minDT $ min maxDT $ maxTravelDistance / maxVelocity
+    where
+        minDT, maxDT :: Double
+        minDT = 1e-4
+        maxDT = 1e-2
+        maxVelocity :: Double
+        maxVelocity = if vs == [] then 0 else maximum vs
 
 stepSimulation :: State -> IO Bool
 stepSimulation s = do
+    velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject)
+        =<< readMVar (grains s)
+    let dt = timeStep velocities
+
     -- Compute next simulation timestep.
-    plStepSimulation (dworld s)
+    plStepSimulation (dworld s) dt
     modifyMVar_ (simulationStep s) $ return . (1+)
 
     velocities <- mapM (fmap magnitude . plGetVelocity . collisionObject)
         =<< readMVar (grains s)
+
     staticGrains <- markStaticGrains =<< readMVar (grains s)
 
     height <- computeGrainsHeight staticGrains
@@ -149,7 +168,8 @@ stepSimulation s = do
         $ createNewGrain s (height+Config.generateGrainsOffset + 2*Config.grainsSizeMean)
 
     when (Config.verbose) $ putStr $
-        "total/moving/frozen/maxV/height:\t" ++
+        "dt/total/moving/frozen/maxV/height:\t" ++
+        show dt ++ "\t" ++
         show totalGrains ++ "\t" ++
         show nMovingGrains ++ "\t" ++
         show nFrozenGrains ++ "\t" ++
