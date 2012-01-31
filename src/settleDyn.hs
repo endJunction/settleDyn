@@ -8,7 +8,7 @@ distributions.
 Copyright (C) 2009, 2010, 2011
           Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
 
-          (C) 2011
+          (C) 2011, 2012
           Dmitrij Yu. Naumov
 
 This program is free software: you can redistribute it and/or modify it under

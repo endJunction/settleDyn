@@ -1,7 +1,7 @@
 /*
 Bullet Continuous Collision Detection and Physics Library C API modifications
 Remove unused functions.
-Copyright (c) 2011 Dmitrij Yu. Naumov
+Copyright (c) 2011, 2012 Dmitrij Yu. Naumov
 
 Bullet Continuous Collision Detection and Physics Library
 Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/

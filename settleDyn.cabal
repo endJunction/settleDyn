@@ -1,5 +1,5 @@
 Name:                settleDyn
-Version:             0.3.0.2
+Version:             0.3.0.3
 
 Synopsis:            Sedimentation process simulator for generation of loose
                      sand-like structures.
@@ -13,7 +13,7 @@ License-file:        LICENSE
 Author:              Dmitrij Yu. Naumov
 Maintainer:          settleDyn@naumov.de
 Copyright:           (C) 2009, 2010, 2011 Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences.
-                     (C) 2011 Dmitrij Yu. Naumov
+                     (C) 2011, 2012 Dmitrij Yu. Naumov
 
 Category:            Scientific Simulation
 Build-type:          Simple

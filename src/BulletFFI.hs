@@ -1,6 +1,6 @@
 {- This file is part of "settleDyn" software.
 
-Copyright (C) 2011
+Copyright (C) 2011, 2012
           Dmitrij Yu. Naumov
 
 "settleDyn" is free software: you can redistribute it and/or modify it under
