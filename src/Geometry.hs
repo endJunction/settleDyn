@@ -39,7 +39,6 @@ module Geometry (
 
     , Transformation
     , fromOpenGLMatrix
-    , getRotTransMatrix
 
     , magnitude
     , (^+^), (^-^)
@@ -83,7 +82,7 @@ toList (x, y, z) = [x, y, z]
 -- | Apply transformation to point.
 transform :: Transformation -> Point -> Point
 transform m (px, py, pz) =
-    let [ax, ay, az, bx, by, bz, cx, cy, cz, tx, ty, tz] = getRotTransMatrix m
+    let [ax, ay, az, bx, by, bz, cx, cy, cz, tx, ty, tz] = elems m
     in
         (ax*px + ay*py + az*pz + tx,
          bx*px + by*py + bz*pz + ty,
@@ -102,11 +101,6 @@ triangleCoordinates ps (a, b, c) = (ps !! a, ps !! b, ps !! c)
 -- Volume is unsigned.
 volumeTetO :: (Point, Point, Point) -> Double
 volumeTetO (a, b, c) = 1/6 * abs (a <.> (b `cross3` c))
-
--- | Get rotation matrix with appended translation components. List of 9 + 3
--- components.
-getRotTransMatrix :: Transformation -> [Double]
-getRotTransMatrix = elems
 
 -- | Convert an openGL matrix to transformation.
 fromOpenGLMatrix :: [Double] -> Transformation
