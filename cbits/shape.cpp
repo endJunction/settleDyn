@@ -132,3 +132,18 @@ readOffFile(const char* filename, int* nPoints, plReal** points,
     std::copy(poly.second.begin(), poly.second.end(), *triangles);
 }
 
+void
+centerPoints(std::vector<double> points)
+{
+    double barycenter[] = {0, 0, 0};
+
+    for (size_t i = 0; i < points.size(); i++)
+        barycenter[i % 3] += points[i];
+
+    barycenter[0] /= points.size()/3;
+    barycenter[1] /= points.size()/3;
+    barycenter[2] /= points.size()/3;
+
+    for (size_t i = 0; i < points.size(); i++)
+        points[i] - barycenter[i % 3];
+}
