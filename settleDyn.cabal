@@ -33,10 +33,10 @@ Executable settleDyn
                         , random
                         , vector-space
   
-    GHC-Options:        -Wall -funbox-strict-fields -lstdc++
+    GHC-Options:        -Wall -funbox-strict-fields
     GHC-Prof-Options:   -Wall -auto-all -caf-all
 
     C-Sources:          cbits/bullet.cpp
     Include-Dirs:       cbits, /usr/include/bullet
-    Extra-Libraries:    BulletDynamics LinearMath BulletCollision
+    Extra-Libraries:    BulletDynamics LinearMath BulletCollision stdc++
 
