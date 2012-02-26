@@ -19,7 +19,8 @@ Category:            Scientific Simulation
 Build-type:          Simple
 Cabal-version:       >=1.4
 
-Extra-source-files:  README, data/*.off, cbits/bullet.h, cbits/bullet.cpp
+Extra-source-files:  README, data/*.off, cbits/bullet.h, cbits/bullet.cpp,
+                     cbits/types.h, cbits/shape.h, cbits/shape.cpp
 
 
 Executable settleDyn
@@ -36,7 +37,7 @@ Executable settleDyn
     GHC-Options:        -Wall -funbox-strict-fields
     GHC-Prof-Options:   -Wall -auto-all -caf-all
 
-    C-Sources:          cbits/bullet.cpp
+    C-Sources:          cbits/bullet.cpp, cbits/shape.cpp
     Include-Dirs:       cbits, /usr/include/bullet
     Extra-Libraries:    BulletDynamics LinearMath BulletCollision stdc++
 
