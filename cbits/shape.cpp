@@ -177,3 +177,10 @@ centerPoints(std::vector<double> points)
     for (size_t i = 0; i < points.size(); i++)
         points[i] - barycenter[i % 3];
 }
+
+void
+scalePoints(std::vector<double> points, const double scale)
+{
+    for (size_t i = 0; i < points.size(); i++)
+        points[i] *= scale;
+}
