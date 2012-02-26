@@ -1,4 +1,5 @@
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -115,6 +116,35 @@ readOffFile(const std::string filename)
 
     return std::make_pair(points, triangles);
 }
+
+std::array<plReal, 6>
+bbox(const std::vector<plReal> points)
+{
+    std::array<plReal, 6> bb =
+        {points[0], points[1], points[2], points[0], points[1], points[2]};
+
+    // Coordinate-wise minimum and maximum over all points.
+    for (size_t i = 3; i < points.size(); i++) {
+        bb[i % 3] = std::min(bb[i % 3], points[i]);
+        bb[3 + i % 3] = std::max(bb[3 + i % 3], points[i]);
+    }
+
+    return bb;
+}
+
+void
+bbox(const int* n, const plReal** points, plReal** box)
+{
+    std::vector<plReal> ps;
+    ps.reserve(*n);
+    std::copy(*points, *points + *n*sizeof(plReal), ps.begin());
+
+    const std::array<plReal, 6> bb = bbox(ps);
+
+    *box = new plReal[6];
+    std::copy(bb.begin(), bb.end(), *box);
+}
+
 
 void
 readOffFile(const char* filename, int* nPoints, plReal** points,

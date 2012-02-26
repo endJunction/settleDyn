@@ -22,6 +22,8 @@ extern "C" {
     extern void readOffFile(const char* filename, int* nPoints, plReal** points,
         int* nTriangles, int** triangles);
 
+    extern void bbox(const int* n, const plReal** points, plReal** box);
+
 #ifdef __cplusplus
 }
 #endif

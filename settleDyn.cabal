@@ -40,6 +40,7 @@ Executable settleDyn
     GHC-Prof-Options:   -Wall -auto-all -caf-all
 
     C-Sources:          cbits/bullet.cpp, cbits/shape.cpp
+    CC-Options:         -std=c++0x
     Include-Dirs:       cbits, /usr/include/bullet
     Extra-Libraries:    BulletDynamics LinearMath BulletCollision stdc++
 
