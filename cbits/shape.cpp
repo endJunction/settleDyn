@@ -116,3 +116,19 @@ readOffFile(const std::string filename)
     return std::make_pair(points, triangles);
 }
 
+void
+readOffFile(const char* filename, int* nPoints, plReal** points,
+        int* nTriangles, int** triangles)
+{
+    const std::pair<std::vector<double>, std::vector<int> > poly
+        = readOffFile(filename);
+
+    *nPoints = poly.first.size();
+    *points = new plReal[*nPoints];
+    std::copy(poly.first.begin(), poly.first.end(), *points);
+
+    *nTriangles = poly.second.size();
+    *triangles = new int[*nTriangles];
+    std::copy(poly.second.begin(), poly.second.end(), *triangles);
+}
+

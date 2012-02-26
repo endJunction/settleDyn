@@ -19,6 +19,9 @@ extern "C" {
 
 	extern  void plSetScaling(plCollisionShapeHandle shape, plVector3 scaling);
 
+    extern void readOffFile(const char* filename, int* nPoints, plReal** points,
+        int* nTriangles, int** triangles);
+
 #ifdef __cplusplus
 }
 #endif

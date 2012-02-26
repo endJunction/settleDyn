@@ -32,6 +32,7 @@ module BulletFFI (
     plCreateDynamicsWorld,
     plStepSimulation,
 
+    readOffFile,
     plCreateConvexRigidBody,
     plCreateBoxRigidBody,
     plPlaceRigidBody, plPlaceRigidBody_,
@@ -44,6 +45,8 @@ module BulletFFI (
 
 import Foreign
 import Foreign.C.Types
+import Data.List.Split (splitEvery)
+import Foreign.C.String (CString(), withCString)
 
 -- Pointers to structures.
 data PlCollisionShape = PlCollisionShape
@@ -145,6 +148,27 @@ plSetPosition b = withTriple (plSetPosition_ b)
 type PlUserDataHandle = Ptr ()
 foreign import ccall safe "plCreateRigidBody" plCreateRigidBody
     :: PlUserDataHandle -> CFloat -> PlCollisionShapeHandle -> IO PlRigidBodyHandle
+
+--
+-- OFF file reader.
+--
+foreign import ccall safe "readOffFile" readOffFile_
+    :: CString -> Ptr CInt -> Ptr (Ptr CFloat) -> Ptr Int -> Ptr (Ptr CInt) -> IO ()
+
+readOffFile :: String -> IO ([[Double]], [[Int]])
+readOffFile file = do
+    alloca $ \nPoints -> do
+    alloca $ \points -> do
+    alloca $ \nTriangles -> do
+    alloca $ \triangles -> do
+    withCString file (\c_file -> readOffFile_ c_file nPoints points nTriangles triangles)
+    np <- fmap fromIntegral $ peek nPoints
+    nt <- fmap fromIntegral $ peek nTriangles
+    psptr <- peek points
+    tsptr <- peek triangles
+    ps <- fmap (splitEvery 3 . map realToFrac) (peekArray np psptr)
+    ts <- fmap (splitEvery 3 . map fromIntegral) (peekArray nt tsptr)
+    return (ps, ts)
 
 --
 -- Convex rigid body from list of points.

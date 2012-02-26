@@ -40,7 +40,7 @@ import Data.VectorSpace
 import Geometry hiding (transform)
 import qualified Geometry as Geom (transform)
 
-import OffReader
+import BulletFFI (readOffFile)
 
 
 data Polyhedron = Polyhedron { points :: [Point]
