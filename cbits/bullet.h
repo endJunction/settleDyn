@@ -20,30 +20,11 @@ subject to the following restrictions:
 #ifndef BULLET_C_API_H
 #define BULLET_C_API_H
 
-#define PL_DECLARE_HANDLE(name) typedef struct name##__ { int unused; } *name
-
-#ifdef BT_USE_DOUBLE_PRECISION
-typedef double	plReal;
-#else
-typedef float	plReal;
-#endif
-
-typedef plReal	plVector3[3];
-typedef plReal	plQuaternion[4];
+#include "types.h"
 
 #ifdef __cplusplus
 extern "C" { 
 #endif
-
-/** 	Dynamics world, belonging to some physics SDK (C-API)*/
-	PL_DECLARE_HANDLE(plDynamicsWorldHandle);
-
-/** Rigid Body that can be part of a Dynamics World (C-API)*/	
-	PL_DECLARE_HANDLE(plRigidBodyHandle);
-
-/** 	Collision Shape/Geometry, property of a Rigid Body (C-API)*/
-	PL_DECLARE_HANDLE(plCollisionShapeHandle);
-
 
 /* Dynamics World */
 
@@ -65,17 +46,6 @@ extern "C" {
 	extern  void plDeleteRigidBody(plRigidBodyHandle body);
 
 
-/* Collision Shape definition */
-
-	extern  plCollisionShapeHandle plNewBoxShape(plReal x, plReal y, plReal z);
-
-	extern  void plDeleteShape(plCollisionShapeHandle shape);
-
-	/* Convex Meshes */
-	extern  plCollisionShapeHandle plNewConvexHullShape();
-	extern  void		plAddVertex(plCollisionShapeHandle convexHull, plReal x,plReal y,plReal z);
-
-	extern  void plSetScaling(plCollisionShapeHandle shape, plVector3 scaling);
 
 	/* get world transform */
 	extern void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix);
