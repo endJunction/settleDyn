@@ -32,6 +32,7 @@ Executable settleDyn
                         , directory
                         , parsec >= 3 && < 4
                         , random
+                        , split
                         , vector-space
   
     GHC-Options:        -Wall -funbox-strict-fields
