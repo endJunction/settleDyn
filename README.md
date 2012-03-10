@@ -1,32 +1,16 @@
+# settleDyn
 
-Programm   : settleDyn---a sedimentation process simulator.
-Copyright  : (C) 2009, 2010, 2011
-             Helmholtz Centre Potsdam,
-             GFZ German Research Centre for Geosciences.
-
-             (C) 2011, 2012
-             Dmitrij Yu. Naumov
-
-License    : This code is released under the GNU General Public License.
-
-Version    : 0.3.0.2
-Maintainer : settleDyn@naumov.de
-
-Author(s)  : Dmitrij Yu. Naumov
-
-
-Description
------------
-
-"settleDyn" is a sedimentation process simulator.  It is capable of generating
+settleDyn is a sedimentation process simulator.  It is capable of generating
 loose sand-like structures from given particle forms and statistical
 distributions.
 
 This software is a complete rewrite of the Settle3D program written by Guido
-Blöcher. See corresponding paper for further details:
-    Blöcher, G. and Zimmermann, G. 2008. Settle3D-A numerical generator for
-      artificial porous media. Comput. Geosci. 34, 12 (Dec. 2008), 1827-1842.
-      DOI= http://dx.doi.org/10.1016/j.cageo.2007.12.008
+BlöcherSee corresponding [paper][BZ08] for further details.
+
+[BZ08]: http://dx.doi.org/10.1016/j.cageo.2007.12.008 "Blöcher, G. and
+Zimmermann, G. 2008. Settle3D-A numerical generator for artificial porous media.
+Comput. Geosci. 34, 12 (Dec. 2008), 1827-1842.
+http://dx.doi.org/10.101/j.cageo.2007.12.008."
 
 The complete sedimentation process including diagenesis involves many processes
 on variing time and space scales. The first step in sandstone formation is
@@ -42,19 +26,42 @@ After the simulation is finished, the grains in their current positions are
 written to specified directory, again in the .off format.
 
 
-Requirements
-------------
+## Requirements
 
 This code is written in Haskell and uses the Bullet Game Physics Engine Library
 for collision detection. In order to compile this program you will need:
- - Bullet Physics Library (http://bulletphysics.org)
+ - Bullet Physics Library [Bullet](http://bulletphysics.org)
  - Haskell e.g. Glasgow Haskell Compiler (GHC)
    (http://hackage.haskell.org/platform/)
  - Various package dependencies given in the .cabal file.
 
+## Feature development
 
-License and Copying
--------------------
+In near future I shall rewrite same functionality in c++. This will make
+compilation and modifications easier.
+
+Possible new features are:
+ - More statistical information
+ - Other output format interesting especially for very large simulations.
+ - Handling concave grains.
+ - Randomization of grains' surfaces.
+ - ...
+
+Any suggestions are welcome.
+
+## License and Copying
+
+Author:
+
+ - Dmitrij Yu. Naumov <settleDyn@naumov.de>.
+
+Copyright:
+
+ - 2009, 2010, 2011 - Helmholtz Centre Potsdam, GFZ German Research
+Centre for Geosciences.
+ - 2011, 2012 - Dmitrij Yu. Naumov
+
+-----------------------------
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
