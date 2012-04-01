@@ -33,6 +33,7 @@ module BulletFFI (
     plStepSimulation,
 
     readOffFile,
+    bbox,
     plCreateConvexRigidBody,
     plCreateBoxRigidBody,
     plPlaceRigidBody, plPlaceRigidBody_,
@@ -148,6 +149,21 @@ plSetPosition b = withTriple (plSetPosition_ b)
 type PlUserDataHandle = Ptr ()
 foreign import ccall safe "plCreateRigidBody" plCreateRigidBody
     :: PlUserDataHandle -> CFloat -> PlCollisionShapeHandle -> IO PlRigidBodyHandle
+
+--
+-- Geometry stuff
+--
+
+bbox :: [Point] -> IO (Maybe (Point, Point))
+bbox [] = return Nothing
+bbox ps = do
+    let nPoints = length ps
+    alloca $ \nPoints -> do
+        alloca $ \bbox -> do
+    return Just (minP, maxP)
+
+foreign import ccall safe "bbox" bbox_
+    :: Ptr CInt -> Ptr (Ptr CFloat) -> Ptr (Ptr CFloat) -> IO ()
 
 --
 -- OFF file reader.
