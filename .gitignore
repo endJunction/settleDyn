@@ -6,3 +6,4 @@ out/
 *.o-boot
 dist/
 cabal-dev/
+build/
