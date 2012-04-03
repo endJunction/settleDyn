@@ -54,6 +54,7 @@ plCreateDynamicsWorld(
     btDiscreteDynamicsWorld* dynamicsWorld =
         new (mem)btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration);
 
+    dynamicsWorld->getSolverInfo().m_splitImpulse=true;
     return (plDynamicsWorldHandle) dynamicsWorld;
 }
 
@@ -78,7 +79,7 @@ void	plStepSimulation(plDynamicsWorldHandle world,	plReal	timeStep)
 {
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
-	dynamicsWorld->stepSimulation(timeStep, 0);
+	dynamicsWorld->stepSimulation(timeStep, 10, 1./1000);
 }
 
 void plAddRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)
