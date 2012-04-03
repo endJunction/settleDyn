@@ -31,8 +31,8 @@ subject to the following restrictions:
 /* Dynamics World */
 plDynamicsWorldHandle
 plCreateDynamicsWorld(
-    btVector3 worldAabbMin = btVector3(-1000,-1000,-1000),
-    btVector3 worldAabbMax = btVector3( 1000, 1000, 1000))
+    btVector3 worldAabbMin = btVector3(-100,-1,-100),
+    btVector3 worldAabbMax = btVector3( 100, 100, 100))
 {
     void* mem = btAlignedAlloc(sizeof(btDefaultCollisionConfiguration),16);
     btDefaultCollisionConfiguration* collisionConfiguration =
