@@ -24,6 +24,7 @@
 
 #include <cstdlib>
 
+#include "grains.h"
 #include "sandbox.h"
 
 int
