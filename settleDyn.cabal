@@ -41,5 +41,5 @@ Executable settleDyn
 
     C-Sources:          cbits/bullet.cpp, cbits/shape.cpp
     Include-Dirs:       cbits, /usr/include/bullet
-    Extra-Libraries:    BulletDynamics LinearMath BulletCollision stdc++
+    Extra-Libraries:    BulletDynamics BulletCollision LinearMath stdc++
 
