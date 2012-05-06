@@ -5,12 +5,9 @@ loose sand-like structures from given particle forms and statistical
 distributions.
 
 This software is a complete rewrite of the Settle3D program written by Guido
-BlöcherSee corresponding [paper][BZ08] for further details.
+Blöcher. See corresponding [paper] [BZ08] for further details.
 
-[BZ08]: http://dx.doi.org/10.1016/j.cageo.2007.12.008 "Blöcher, G. and
-Zimmermann, G. 2008. Settle3D-A numerical generator for artificial porous media.
-Comput. Geosci. 34, 12 (Dec. 2008), 1827-1842.
-http://dx.doi.org/10.101/j.cageo.2007.12.008."
+[BZ08]: http://dx.doi.org/10.1016/j.cageo.2007.12.008 "Blöcher, G. and Zimmermann, G. 2008. Settle3D-A numerical generator for artificial porous media.  Comput. Geosci. 34, 12 (Dec. 2008), 1827-1842.  http://dx.doi.org/10.101/j.cageo.2007.12.008."
 
 The complete sedimentation process including diagenesis involves many processes
 on variing time and space scales. The first step in sandstone formation is
@@ -20,7 +17,9 @@ cannot be simulated with settleDyn.
 
 Simulation process starts with definition of grain shapes and grain size
 distributions. The shapes are polyhedral descriptions read from files in
-Geomview Object File Format (.off). For now, only convex shapes are allowed.
+Geomview Object File Format ([.off] [G07]). For now, only convex shapes are allowed.
+
+[G07]: http://www.geomview.org/docs/html/OFF.html "Geomview 1.9.4 Manual, 2008.  Section 4.2 Object File Formats"
 
 After the simulation is finished, the grains in their current positions are
 written to specified directory, again in the .off format.
