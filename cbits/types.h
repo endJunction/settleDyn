@@ -23,26 +23,26 @@ subject to the following restrictions:
 #define PL_DECLARE_HANDLE(name) typedef struct name##__ { int unused; } *name
 
 #ifdef BT_USE_DOUBLE_PRECISION
-typedef double	plReal;
+typedef double	pl_Real;
 #else
-typedef float	plReal;
+typedef float	pl_Real;
 #endif
 
-typedef plReal	plVector3[3];
-typedef plReal	plQuaternion[4];
+typedef pl_Real	pl_Vector3[3];
+typedef pl_Real	pl_Quaternion[4];
 
 #ifdef __cplusplus
 extern "C" { 
 #endif
 
 /** 	Dynamics world, belonging to some physics SDK (C-API)*/
-	PL_DECLARE_HANDLE(plDynamicsWorldHandle);
+	PL_DECLARE_HANDLE(pl_DynamicsWorldHandle);
 
 /** Rigid Body that can be part of a Dynamics World (C-API)*/	
-	PL_DECLARE_HANDLE(plRigidBodyHandle);
+	PL_DECLARE_HANDLE(pl_RigidBodyHandle);
 
 /** 	Collision Shape/Geometry, property of a Rigid Body (C-API)*/
-	PL_DECLARE_HANDLE(plCollisionShapeHandle);
+	PL_DECLARE_HANDLE(pl_CollisionShapeHandle);
 
 #ifdef __cplusplus
 }

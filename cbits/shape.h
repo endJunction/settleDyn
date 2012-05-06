@@ -9,17 +9,17 @@ extern "C" {
 
 /* Collision Shape definition */
 
-	extern  plCollisionShapeHandle plNewBoxShape(plReal x, plReal y, plReal z);
+	extern pl_CollisionShapeHandle pl_NewBoxShape(pl_Real x, pl_Real y, pl_Real z);
 
-	extern  void plDeleteShape(plCollisionShapeHandle shape);
+	extern void pl_DeleteShape(pl_CollisionShapeHandle shape);
 
 	/* Convex Meshes */
-	extern  plCollisionShapeHandle plNewConvexHullShape();
-	extern  void		plAddVertex(plCollisionShapeHandle convexHull, plReal x,plReal y,plReal z);
+	extern pl_CollisionShapeHandle pl_NewConvexHullShape();
+	extern void		pl_AddVertex(pl_CollisionShapeHandle convexHull, pl_Real x,pl_Real y,pl_Real z);
 
-	extern  void plSetScaling(plCollisionShapeHandle shape, plVector3 scaling);
+	extern void pl_SetScaling(pl_CollisionShapeHandle shape, pl_Vector3 scaling);
 
-    extern void readOffFile(const char* filename, int* nPoints, plReal** points,
+    extern void readOffFile(const char* filename, int* nPoints, pl_Real** points,
         int* nTriangles, int** triangles);
 
 #ifdef __cplusplus

@@ -17,7 +17,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "bullet.h"
+#include "types.h"
 #include "btBulletDynamicsCommon.h"
 
 #include "LinearMath/btVector3.h"
@@ -28,9 +28,14 @@ subject to the following restrictions:
 #include "BulletCollision/Gimpact/btGImpactShape.h"
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Dynamics World */
-plDynamicsWorldHandle
-plCreateDynamicsWorld(
+pl_DynamicsWorldHandle
+pl_CreateDynamicsWorld(
     btVector3 worldAabbMin = btVector3(-100,-1,-100),
     btVector3 worldAabbMax = btVector3( 100, 100, 100))
 {
@@ -55,11 +60,11 @@ plCreateDynamicsWorld(
         new (mem)btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration);
 
     dynamicsWorld->getSolverInfo().m_splitImpulse=true;
-    return (plDynamicsWorldHandle) dynamicsWorld;
+    return (pl_DynamicsWorldHandle) dynamicsWorld;
 }
 
 void
-plDeleteDynamicsWorld(plDynamicsWorldHandle world)
+pl_DeleteDynamicsWorld(pl_DynamicsWorldHandle world)
 {
     btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
@@ -75,14 +80,14 @@ plDeleteDynamicsWorld(plDynamicsWorldHandle world)
     btAlignedFree(dynamicsWorld);
 }
 
-void	plStepSimulation(plDynamicsWorldHandle world,	plReal	timeStep)
+void	pl_StepSimulation(pl_DynamicsWorldHandle world,	pl_Real	timeStep)
 {
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
 	dynamicsWorld->stepSimulation(timeStep, 10, 1./1000);
 }
 
-void plAddRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)
+void pl_AddRigidBody(pl_DynamicsWorldHandle world, pl_RigidBodyHandle object)
 {
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
@@ -92,7 +97,7 @@ void plAddRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)
 	dynamicsWorld->addRigidBody(body);
 }
 
-void plRemoveRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)
+void pl_RemoveRigidBody(pl_DynamicsWorldHandle world, pl_RigidBodyHandle object)
 {
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAssert(dynamicsWorld);
@@ -104,7 +109,7 @@ void plRemoveRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object)
 
 /* Rigid Body  */
 
-plRigidBodyHandle plCreateRigidBody(	void* user_data,  float mass, plCollisionShapeHandle cshape )
+pl_RigidBodyHandle pl_CreateRigidBody(	void* user_data,  float mass, pl_CollisionShapeHandle cshape )
 {
 	btTransform trans;
 	trans.setIdentity();
@@ -120,17 +125,17 @@ plRigidBodyHandle plCreateRigidBody(	void* user_data,  float mass, plCollisionSh
 	btRigidBody* body = new (mem)btRigidBody(rbci);
 	body->setWorldTransform(trans);
 	body->setUserPointer(user_data);
-	return (plRigidBodyHandle) body;
+	return (pl_RigidBodyHandle) body;
 }
 
-void plDeleteRigidBody(plRigidBodyHandle cbody)
+void pl_DeleteRigidBody(pl_RigidBodyHandle cbody)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(cbody);
 	btAssert(body);
 	btAlignedFree( body);
 }
 
-void plSetMassProps(plRigidBodyHandle object, const plReal mass, const plVector3 inertia)
+void pl_SetMassProps(pl_RigidBodyHandle object, const pl_Real mass, const pl_Vector3 inertia)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -139,7 +144,7 @@ void plSetMassProps(plRigidBodyHandle object, const plReal mass, const plVector3
 
 
 
-void plSetPosition(plRigidBodyHandle object, const plVector3 position)
+void pl_SetPosition(pl_RigidBodyHandle object, const pl_Vector3 position)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -149,7 +154,7 @@ void plSetPosition(plRigidBodyHandle object, const plVector3 position)
 	body->setWorldTransform(worldTrans);
 }
 
-void plSetOrientation(plRigidBodyHandle object, const plQuaternion orientation)
+void pl_SetOrientation(pl_RigidBodyHandle object, const pl_Quaternion orientation)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -159,7 +164,7 @@ void plSetOrientation(plRigidBodyHandle object, const plQuaternion orientation)
 	body->setWorldTransform(worldTrans);
 }
 
-void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix)
+void	pl_GetOpenGLMatrix(pl_RigidBodyHandle object, pl_Real* matrix)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -167,7 +172,7 @@ void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix)
 
 }
 
-void	plGetPosition(plRigidBodyHandle object,plVector3 position)
+void	pl_GetPosition(pl_RigidBodyHandle object,pl_Vector3 position)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -177,7 +182,7 @@ void	plGetPosition(plRigidBodyHandle object,plVector3 position)
 	position[2] = pos.getZ();
 }
 
-void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation)
+void pl_GetOrientation(pl_RigidBodyHandle object,pl_Quaternion orientation)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -188,7 +193,7 @@ void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation)
 	orientation[3] = orn.getW();
 }
 
-void plGetVelocity(plRigidBodyHandle object, plVector3 velocity)
+void pl_GetVelocity(pl_RigidBodyHandle object, pl_Vector3 velocity)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -197,3 +202,7 @@ void plGetVelocity(plRigidBodyHandle object, plVector3 velocity)
 	velocity[1] = v.getY();
 	velocity[2] = v.getZ();
 }
+
+#ifdef __cplusplus
+}
+#endif

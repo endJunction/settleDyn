@@ -77,7 +77,7 @@ foreign import ccall safe "plCreateDynamicsWorld" plCreateDynamicsWorld_
 plStepSimulation :: PlDynamicsWorldHandle -> Double -> IO ()
 plStepSimulation dw dt = plStepSimulation_ dw $ realToFrac dt
 
-foreign import ccall safe "plStepSimulation" plStepSimulation_
+foreign import ccall safe "pl_StepSimulation" plStepSimulation_
     :: PlDynamicsWorldHandle -> CFloat -> IO ()
 
 
@@ -102,7 +102,7 @@ listToTriple as
     | otherwise = error $ "Try to convert list of length " ++ show (length as)
         ++ " to triple."
 
-foreign import ccall safe "plSetMassProps" plSetMassProps_
+foreign import ccall safe "pl_SetMassProps" plSetMassProps_
     :: PlRigidBodyHandle -> CFloat -> Ptr CFloat -> IO ()
 plMakeRigidBodyStatic :: PlRigidBodyHandle -> IO ()
 plMakeRigidBodyStatic b = allocaArray 3 $
@@ -113,7 +113,7 @@ foreign import ccall safe "plGetOpenGLMatrix" plGetOpenGLMatrix_
 plGetOpenGLMatrix :: PlRigidBodyHandle -> IO [Double]
 plGetOpenGLMatrix body = callWithArray 16 (plGetOpenGLMatrix_ body)
 
-foreign import ccall safe "plGetVelocity" plGetVelocity_
+foreign import ccall safe "pl_GetVelocity" plGetVelocity_
     :: PlRigidBodyHandle -> Ptr CFloat -> IO ()
 plGetVelocity :: PlRigidBodyHandle -> IO (Triple Double)
 plGetVelocity body = fmap listToTriple $ callWithArray 3 (plGetVelocity_ body)
@@ -137,7 +137,7 @@ plPlaceRigidBody createBody pos dw = do
     plSetPosition b pos
     return b
 
-foreign import ccall safe "plAddRigidBody" plAddRigidBody
+foreign import ccall safe "pl_AddRigidBody" plAddRigidBody
     :: PlDynamicsWorldHandle -> PlRigidBodyHandle -> IO ()
 
 foreign import ccall safe "plSetPosition" plSetPosition_
@@ -146,7 +146,7 @@ plSetPosition :: Real a => PlRigidBodyHandle -> Triple a -> IO ()
 plSetPosition b = withTriple (plSetPosition_ b)
 
 type PlUserDataHandle = Ptr ()
-foreign import ccall safe "plCreateRigidBody" plCreateRigidBody
+foreign import ccall safe "pl_CreateRigidBody" plCreateRigidBody
     :: PlUserDataHandle -> CFloat -> PlCollisionShapeHandle -> IO PlRigidBodyHandle
 
 --
@@ -181,16 +181,16 @@ plCreateConvexRigidBody ps = do
     -- New rigid body with given mass and shape.
     plCreateRigidBody Foreign.nullPtr 1 ch
 
-foreign import ccall safe "plNewConvexHullShape" plNewConvexHullShape
+foreign import ccall safe "pl_NewConvexHullShape" plNewConvexHullShape
     :: Ptr CFloat -> Int -> Int -> IO PlCollisionShapeHandle
 
-foreign import ccall safe "plAddVertex" plAddVertex_
+foreign import ccall safe "pl_AddVertex" plAddVertex_
     :: PlCollisionShapeHandle -> CFloat -> CFloat -> CFloat -> IO ()
 plAddVertex :: Real a => PlCollisionShapeHandle -> Triple a -> IO ()
 plAddVertex shape (x, y, z) =
     plAddVertex_ shape (realToFrac x) (realToFrac y) (realToFrac z)
 
-foreign import ccall safe "plSetScaling" plSetScaling_
+foreign import ccall safe "pl_SetScaling" plSetScaling_
     :: PlCollisionShapeHandle -> PlVector3 -> IO ()
 plSetScaling :: Real a => PlCollisionShapeHandle -> Triple a -> IO ()
 plSetScaling shape = withTriple (plSetScaling_ shape)
@@ -201,7 +201,7 @@ plSetScaling shape = withTriple (plSetScaling_ shape)
 plCreateBoxRigidBody :: Real a => Triple a -> IO PlRigidBodyHandle
 plCreateBoxRigidBody dims = plNewBoxShape dims >>= plCreateRigidBody Foreign.nullPtr 0
 
-foreign import ccall safe "plNewBoxShape" plNewBoxShape_
+foreign import ccall safe "pl_NewBoxShape" plNewBoxShape_
     :: CFloat -> CFloat -> CFloat -> IO PlCollisionShapeHandle
 plNewBoxShape:: Real a => Triple a -> IO PlCollisionShapeHandle
 plNewBoxShape (w, h, d) = plNewBoxShape_ (realToFrac w) (realToFrac h) (realToFrac d)

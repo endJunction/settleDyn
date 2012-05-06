@@ -16,21 +16,21 @@
 
 /* Collision Shape definition */
 
-plCollisionShapeHandle plNewBoxShape(plReal x, plReal y, plReal z)
+pl_CollisionShapeHandle pl_NewBoxShape(pl_Real x, pl_Real y, pl_Real z)
 {
 	void* mem = btAlignedAlloc(sizeof(btBoxShape),16);
-	return (plCollisionShapeHandle) new (mem)btBoxShape(btVector3(x,y,z));
+	return (pl_CollisionShapeHandle) new (mem)btBoxShape(btVector3(x,y,z));
 }
 
 /* Convex Meshes */
-plCollisionShapeHandle plNewConvexHullShape()
+pl_CollisionShapeHandle pl_NewConvexHullShape()
 {
 	void* mem = btAlignedAlloc(sizeof(btConvexHullShape),16);
-	return (plCollisionShapeHandle) new (mem)btConvexHullShape();
+	return (pl_CollisionShapeHandle) new (mem)btConvexHullShape();
 }
 
 
-void		plAddVertex(plCollisionShapeHandle cshape, plReal x,plReal y,plReal z)
+void		pl_AddVertex(pl_CollisionShapeHandle cshape, pl_Real x,pl_Real y,pl_Real z)
 {
 	btCollisionShape* colShape = reinterpret_cast<btCollisionShape*>( cshape);
 	(void)colShape;
@@ -40,13 +40,13 @@ void		plAddVertex(plCollisionShapeHandle cshape, plReal x,plReal y,plReal z)
 
 }
 
-void plDeleteShape(plCollisionShapeHandle cshape)
+void pl_DeleteShape(pl_CollisionShapeHandle cshape)
 {
 	btCollisionShape* shape = reinterpret_cast<btCollisionShape*>( cshape);
 	btAssert(shape);
 	btAlignedFree(shape);
 }
-void plSetScaling(plCollisionShapeHandle cshape, plVector3 cscaling)
+void pl_SetScaling(pl_CollisionShapeHandle cshape, pl_Vector3 cscaling)
 {
 	btCollisionShape* shape = reinterpret_cast<btCollisionShape*>( cshape);
 	btAssert(shape);
@@ -117,14 +117,14 @@ readOffFile(const std::string filename)
 }
 
 void
-readOffFile(const char* filename, int* nPoints, plReal** points,
+readOffFile(const char* filename, int* nPoints, pl_Real** points,
         int* nTriangles, int** triangles)
 {
     const std::pair<std::vector<double>, std::vector<int> > poly
         = readOffFile(filename);
 
     *nPoints = poly.first.size();
-    *points = new plReal[*nPoints];
+    *points = new pl_Real[*nPoints];
     std::copy(poly.first.begin(), poly.first.end(), *points);
 
     *nTriangles = poly.second.size();

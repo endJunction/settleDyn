@@ -28,35 +28,35 @@ extern "C" {
 
 /* Dynamics World */
 
-	extern  plDynamicsWorldHandle plCreateDynamicsWorld(plVector3 worldAabbMin, plVector3 worldAabbMax);
+	extern pl_DynamicsWorldHandle pl_CreateDynamicsWorld(pl_Vector3 worldAabbMin, pl_Vector3 worldAabbMax);
 
-	extern  void           plDeleteDynamicsWorld(plDynamicsWorldHandle world);
+	extern void           pl_DeleteDynamicsWorld(pl_DynamicsWorldHandle world);
 
-	extern	void	plStepSimulation(plDynamicsWorldHandle,	plReal	timeStep);
+	extern void	pl_StepSimulation(pl_DynamicsWorldHandle,	pl_Real	timeStep);
 
-	extern  void plAddRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object);
+	extern void pl_AddRigidBody(pl_DynamicsWorldHandle world, pl_RigidBodyHandle object);
 
-	extern  void plRemoveRigidBody(plDynamicsWorldHandle world, plRigidBodyHandle object);
+	extern void pl_RemoveRigidBody(pl_DynamicsWorldHandle world, pl_RigidBodyHandle object);
 
 
 /* Rigid Body  */
 
-	extern  plRigidBodyHandle plCreateRigidBody(	void* user_data,  float mass, plCollisionShapeHandle cshape );
+	extern pl_RigidBodyHandle pl_CreateRigidBody(	void* user_data,  float mass, pl_CollisionShapeHandle cshape );
 
-	extern  void plDeleteRigidBody(plRigidBodyHandle body);
+	extern void pl_DeleteRigidBody(pl_RigidBodyHandle body);
 
 
 
 	/* get world transform */
-	extern void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix);
-	extern void	plGetPosition(plRigidBodyHandle object,plVector3 position);
-	extern void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation);
-    extern void plGetVelocity(plRigidBodyHandle object, plVector3 velocity);
+	extern void	pl_GetOpenGLMatrix(pl_RigidBodyHandle object, pl_Real* matrix);
+	extern void	pl_GetPosition(pl_RigidBodyHandle object,pl_Vector3 position);
+	extern void pl_GetOrientation(pl_RigidBodyHandle object,pl_Quaternion orientation);
+    void pl_GetVelocity(pl_RigidBodyHandle object, pl_Vector3 velocity);
 
 	/* set world transform (position/orientation) */
-	extern  void plSetPosition(plRigidBodyHandle object, const plVector3 position);
-	extern  void plSetOrientation(plRigidBodyHandle object, const plQuaternion orientation);
-    extern  void plSetMassProps(plRigidBodyHandle object, const plReal mass, const plVector3 inertia);
+	extern void pl_SetPosition(pl_RigidBodyHandle object, const pl_Vector3 position);
+	extern void pl_SetOrientation(pl_RigidBodyHandle object, const pl_Quaternion orientation);
+    extern void pl_SetMassProps(pl_RigidBodyHandle object, const pl_Real mass, const pl_Vector3 inertia);
 
 #ifdef __cplusplus
 }
