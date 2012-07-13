@@ -19,11 +19,17 @@
  * Author: Dmitrij Yu. Naumov
  */
 
+#ifndef SETTLEDYN_SANDBOX_H
+#define SETTLEDYN_SANDBOX_H
+
+
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletMultiThreaded/PosixThreadSupport.h>
 #include <bullet/BulletMultiThreaded/PlatformDefinitions.h>
 #include <bullet/BulletMultiThreaded/btParallelConstraintSolver.h>
 #include <bullet/BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h>
+
+namespace SettleDyn {
 
 const int numThreads = 2;
 
@@ -106,3 +112,5 @@ Sandbox {
 
     btAlignedObjectArray<btCollisionShape*> _collisionShapes;
 };
+
+#endif  // SETTLEDYN_SANDBOX_H
