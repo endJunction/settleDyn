@@ -28,6 +28,8 @@
 
 #include <bullet/btBulletDynamicsCommon.h>
 
+namespace SettleDyn {
+
 // Read .OFF file into triangle mesh. Only triangles are allowed in the surface
 // description.
 btTriangleMesh*
@@ -91,5 +93,7 @@ readOffFile(const std::string filename)
 
     return mesh;
 }
+
+}   // namespace SettleDyn
 
 #endif  // SETTLEDYN_GRAINS_H

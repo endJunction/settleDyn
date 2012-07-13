@@ -113,4 +113,6 @@ Sandbox {
     btAlignedObjectArray<btCollisionShape*> _collisionShapes;
 };
 
+}   // namespace SettleDyn
+
 #endif  // SETTLEDYN_SANDBOX_H

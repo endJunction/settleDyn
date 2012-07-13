@@ -31,6 +31,8 @@ int
 main(int argc, char* argv[])
 {
 
+    using namespace SettleDyn;
+
 /* Load prototypes.
  *  A prototype is a triangulated closed surface (a polyhedron).
  *    + Use simpler bullet bodies e.g. sphere, cube, etc. for faster
