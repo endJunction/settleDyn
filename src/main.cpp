@@ -51,6 +51,7 @@ main(int argc, char* argv[])
  *      Those are static objects.
  *  - Run simulation loop in own child process (which can be multithreaded).
  */
+    Sandbox* sandbox = constructSandbox(10);
 
 /* Interaction with running simulation.
  *  - Pause or finish simulation.

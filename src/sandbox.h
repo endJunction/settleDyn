@@ -33,63 +33,29 @@ namespace SettleDyn {
 
 const int numThreads = 2;
 
-/// Sandbox contains bullet physics environment.
+/// Sandbox is specialized bullet physics environment.
 class
-Sandbox {
+Sandbox : public btDiscreteDynamicsWorld {
 
     public:
 
     /// Size of the sandbox is [-xySize/2, xySize/2]^2 in x and y directions and
     /// 1000 units in vertical direction.
-    Sandbox(const float xySize)
+    Sandbox(btDispatcher* dispatcher,
+            btBroadphaseInterface* pairCache,
+            btConstraintSolver* constraintSolver,
+            btCollisionConfiguration* collisionConfiguration)
+        : btDiscreteDynamicsWorld(
+                dispatcher,
+                pairCache,
+                constraintSolver,
+                collisionConfiguration)
     {
-        //
-        // Posix threads.
-        //
-        PosixThreadSupport::ThreadConstructionInfo collisionConstructionInfo(
-            "collision", processCollisionTask, createCollisionLocalStoreMemory,
-            numThreads);
-        _threadSupportCollision = new PosixThreadSupport(collisionConstructionInfo);
-
-        PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(
-            "solver", SolverThreadFunc, SolverlsMemoryFunc, numThreads);
-        _threadSupportSolver = new PosixThreadSupport(solverConstructionInfo);
-
-        //
-        // Collision configuration.
-        //
-        _collisionConfiguration = new btDefaultCollisionConfiguration();
-
-        //
-        // Dispatcher.
-        //
-        _dispatcher = new btCollisionDispatcher(_collisionConfiguration);
-
-        //
-        // Broadphase.
-        //
-        _broadphase = new btAxisSweep3(
-                            btVector3(-xySize/2-1, -xySize/2-1, -1),
-                            btVector3( xySize/2+1,  xySize/2+1, 1000));
-
-        //
-        // Solver.
-        //
-        _solver = new btParallelConstraintSolver(_threadSupportSolver);
-
-
-        //
-        // Create and config world.
-        //
-        _world = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver,
-                                             _collisionConfiguration);
-        _world->setGravity(btVector3(0, 0, -9.81));
 
     }
 
-    ~Sandbox()
+    virtual ~Sandbox()
     {
-        delete _world;
         delete _solver;
         delete _broadphase;
         delete _dispatcher;
@@ -101,6 +67,10 @@ Sandbox {
 
     private:
 
+    Sandbox(const Sandbox&);
+    Sandbox& operator==(const Sandbox&);
+
+    private:
     PosixThreadSupport* _threadSupportCollision;
     PosixThreadSupport* _threadSupportSolver;
 
@@ -112,6 +82,60 @@ Sandbox {
 
     btAlignedObjectArray<btCollisionShape*> _collisionShapes;
 };
+
+Sandbox*
+constructSandbox(const float xySize)
+{
+    //
+    // Posix threads.
+    //
+    PosixThreadSupport::ThreadConstructionInfo collisionConstructionInfo(
+        "collision", processCollisionTask, createCollisionLocalStoreMemory,
+        numThreads);
+    PosixThreadSupport* threadSupportCollision
+        = new PosixThreadSupport(collisionConstructionInfo);
+
+    PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(
+        "solver", SolverThreadFunc, SolverlsMemoryFunc, numThreads);
+    PosixThreadSupport* threadSupportSolver
+        = new PosixThreadSupport(solverConstructionInfo);
+
+    //
+    // Collision configuration.
+    //
+    btDefaultCollisionConfiguration* collisionConfiguration
+        = new btDefaultCollisionConfiguration();
+
+    //
+    // Dispatcher.
+    //
+    btCollisionDispatcher* dispatcher
+        = new btCollisionDispatcher(collisionConfiguration);
+
+    //
+    // Broadphase.
+    //
+    btAxisSweep3* broadphase = new btAxisSweep3(
+        btVector3(-xySize/2-1, -xySize/2-1, -1),
+        btVector3( xySize/2+1,  xySize/2+1, 1000));
+
+    //
+    // Solver.
+    //
+    btParallelConstraintSolver* solver
+        = new btParallelConstraintSolver(threadSupportSolver);
+
+
+    //
+    // Create and config world.
+    //
+    Sandbox* sandbox = new Sandbox(dispatcher, broadphase, solver,
+            collisionConfiguration);
+
+    sandbox->setGravity(btVector3(0, -9.81, 0));
+
+    return sandbox;
+}
 
 }   // namespace SettleDyn
 
