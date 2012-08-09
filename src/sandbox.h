@@ -29,6 +29,8 @@
 #include <bullet/BulletMultiThreaded/btParallelConstraintSolver.h>
 #include <bullet/BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h>
 
+#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
+
 namespace SettleDyn {
 
 const int numThreads = 2;
@@ -52,6 +54,30 @@ Sandbox : public btDiscreteDynamicsWorld {
                 collisionConfiguration)
     {
 
+    }
+
+    btRigidBody*
+    createBody(btCollisionShape* shape, const float mass = 0)
+    {
+        btAssert(shape);
+
+        btVector3 localInertia(0, 0, 0);
+        if (mass > 1e-6)
+        {
+            shape->calculateLocalInertia(mass,localInertia);
+        }
+
+        void* mem = btAlignedAlloc(sizeof(btRigidBody),16);
+        btRigidBody::btRigidBodyConstructionInfo rbci(
+                mass, 0, shape, localInertia);
+        btRigidBody* body = new (mem)btRigidBody(
+            btRigidBody::btRigidBodyConstructionInfo(
+                mass, 0, shape, localInertia));
+
+        btTransform t;
+        t.setIdentity();
+        body->setWorldTransform(t);
+        return body;
     }
 
     virtual ~Sandbox()
