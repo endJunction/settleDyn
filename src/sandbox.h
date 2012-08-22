@@ -67,6 +67,31 @@ Sandbox : public btDiscreteDynamicsWorld {
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0, -1),  2.5)));
     }
 
+    virtual ~Sandbox()
+    {
+        std::vector<btCollisionShape*> collisionShapes;
+        for (btRigidBody* i : staticBodies)
+        {
+            collisionShapes.push_back(i->getCollisionShape());
+            delete i;
+        }
+
+        for (btCollisionShape* i : collisionShapes)
+        {
+            delete i;
+        }
+
+        delete _collisionConfiguration;
+        delete _dispatcher;
+        delete _broadphase;
+        delete _solver;
+
+        // To delete threadSupportSolver from solverConstructionInfo created in
+        // constructSandbox.
+    }
+
+    private:
+
     btRigidBody*
     createBody(btCollisionShape* shape, const float mass = 0)
     {
@@ -89,29 +114,6 @@ Sandbox : public btDiscreteDynamicsWorld {
         t.setIdentity();
         body->setWorldTransform(t);
         return body;
-    }
-
-    virtual ~Sandbox()
-    {
-        std::vector<btCollisionShape*> collisionShapes;
-        for (btRigidBody* i : staticBodies)
-        {
-            collisionShapes.push_back(i->getCollisionShape());
-            delete i;
-        }
-
-        for (btCollisionShape* i : collisionShapes)
-        {
-            delete i;
-        }
-
-        delete _collisionConfiguration;
-        delete _dispatcher;
-        delete _broadphase;
-        delete _solver;
-
-        // To delete threadSupportSolver from solverConstructionInfo created in
-        // constructSandbox.
     }
 
     private:
