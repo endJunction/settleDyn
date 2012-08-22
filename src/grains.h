@@ -94,6 +94,25 @@ readOffFile(const std::string filename)
     return mesh;
 }
 
+std::vector<btCollisionShape*>
+createPrototypes(const std::vector<std::string>& ps)
+{
+    // Create collision shapes from prototype descriptions. Simple shapes
+    // are created according to the strings.
+    std::vector<btCollisionShape*> shapes;
+
+    for (const std::string p : ps)
+    {
+        // Skip unsupported shapes silently.
+        if (p == "CUBE")
+            shapes.push_back(new btBoxShape(btVector3(0.5, 0.5, 0.5)));
+        if (p == "SPHERE")
+            shapes.push_back(new btSphereShape(0.5));
+    }
+
+    return shapes;
+}
+
 }   // namespace SettleDyn
 
 #endif  // SETTLEDYN_GRAINS_H

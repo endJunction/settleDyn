@@ -22,7 +22,9 @@
  * Author: Dmitrij Yu. Naumov
  */
 
+#include <algorithm>
 #include <cstdlib>
+#include <string>
 
 #include "grains.h"
 #include "sandbox.h"
@@ -39,7 +41,14 @@ main(int argc, char* argv[])
  *      simulations.
  *  Prototypes are read from OFF-files.
  *  It has (sieve-)size, volume and is scalable.
- *
+ */
+    std::vector<std::string> prototype_descriptions;
+    prototype_descriptions.push_back("CUBE");
+
+    const std::vector<btCollisionShape*> prototypes
+        = createPrototypes(prototype_descriptions);
+
+/*
  * Init random generators
  *   Weibull, uniform or bivariate for grain sizes.
  *   Integer for choosing from grain prototypes.
@@ -65,6 +74,9 @@ main(int argc, char* argv[])
  */
 
     delete sandbox;
+
+    for (btCollisionShape* i : prototypes)
+        delete i;
 
     return EXIT_SUCCESS;
 }
