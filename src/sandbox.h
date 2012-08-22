@@ -44,14 +44,18 @@ Sandbox : public btDiscreteDynamicsWorld {
     /// Size of the sandbox is [-xySize/2, xySize/2]^2 in x and y directions and
     /// 1000 units in vertical direction.
     Sandbox(btDispatcher* dispatcher,
-            btBroadphaseInterface* pairCache,
-            btConstraintSolver* constraintSolver,
+            btBroadphaseInterface* broadphase,
+            btConstraintSolver* solver,
             btCollisionConfiguration* collisionConfiguration)
         : btDiscreteDynamicsWorld(
                 dispatcher,
-                pairCache,
-                constraintSolver,
-                collisionConfiguration)
+                broadphase,
+                solver,
+                collisionConfiguration),
+          _dispatcher(dispatcher),
+          _broadphase(broadphase),
+          _solver(solver),
+          _collisionConfiguration(collisionConfiguration)
     {
 
     }
@@ -82,13 +86,13 @@ Sandbox : public btDiscreteDynamicsWorld {
 
     virtual ~Sandbox()
     {
-        delete _solver;
-        delete _broadphase;
-        delete _dispatcher;
         delete _collisionConfiguration;
+        delete _dispatcher;
+        delete _broadphase;
+        delete _solver;
 
-        delete _threadSupportCollision;
-        delete _threadSupportSolver;
+        // To delete threadSupportSolver from solverConstructionInfo created in
+        // constructSandbox.
     }
 
     private:
@@ -97,16 +101,13 @@ Sandbox : public btDiscreteDynamicsWorld {
     Sandbox& operator==(const Sandbox&);
 
     private:
-    PosixThreadSupport* _threadSupportCollision;
-    PosixThreadSupport* _threadSupportSolver;
 
-    btCollisionConfiguration* _collisionConfiguration;
     btDispatcher* _dispatcher;
     btBroadphaseInterface* _broadphase;
     btConstraintSolver* _solver;
-    btDiscreteDynamicsWorld* _world;
+    btCollisionConfiguration* _collisionConfiguration;
 
-    btAlignedObjectArray<btCollisionShape*> _collisionShapes;
+    std::vector<btStaticPlaneShape*> sandboxPlanes;
 };
 
 Sandbox*
@@ -115,12 +116,6 @@ constructSandbox(const float xySize)
     //
     // Posix threads.
     //
-    PosixThreadSupport::ThreadConstructionInfo collisionConstructionInfo(
-        "collision", processCollisionTask, createCollisionLocalStoreMemory,
-        numThreads);
-    PosixThreadSupport* threadSupportCollision
-        = new PosixThreadSupport(collisionConstructionInfo);
-
     PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(
         "solver", SolverThreadFunc, SolverlsMemoryFunc, numThreads);
     PosixThreadSupport* threadSupportSolver

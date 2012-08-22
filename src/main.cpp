@@ -64,5 +64,7 @@ main(int argc, char* argv[])
  *  + use motion states to track positional changes.
  */
 
+    delete sandbox;
+
     return EXIT_SUCCESS;
 }
