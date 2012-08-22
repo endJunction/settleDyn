@@ -30,6 +30,7 @@
 #include <bullet/BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h>
 
 #include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
+#include <bullet/BulletCollision/CollisionShapes/btStaticPlaneShape.h>
 
 namespace SettleDyn {
 
@@ -58,6 +59,16 @@ Sandbox : public btDiscreteDynamicsWorld {
           _collisionConfiguration(collisionConfiguration)
     {
 
+            // Create ground plane and walls.
+            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 1, 0), 0));
+            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(1, 0, 0), -2.5));
+            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(-1, 0, 0), 2.5));
+            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 0, 1), -2.5));
+            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 0, -1), 2.5));
+            for (btStaticPlaneShape* i : sandboxPlanes)
+            {
+                staticBodies.push_back(createBody(i, 0));
+            }
     }
 
     btRigidBody*
@@ -86,6 +97,11 @@ Sandbox : public btDiscreteDynamicsWorld {
 
     virtual ~Sandbox()
     {
+        for (btRigidBody* i : staticBodies)
+            delete i;
+        for (btStaticPlaneShape* i : sandboxPlanes)
+            delete i;
+
         delete _collisionConfiguration;
         delete _dispatcher;
         delete _broadphase;
@@ -108,6 +124,7 @@ Sandbox : public btDiscreteDynamicsWorld {
     btCollisionConfiguration* _collisionConfiguration;
 
     std::vector<btStaticPlaneShape*> sandboxPlanes;
+    std::vector<btRigidBody*> staticBodies;
 };
 
 Sandbox*
