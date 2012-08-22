@@ -68,6 +68,13 @@ main(int argc, char* argv[])
  *  - Insert new grain at given position.
  */
 
+    for (size_t timeStep = 0; timeStep < 100000; timeStep++)
+    {
+        if (timeStep % 1000 == 0)
+            sandbox->addGrain(prototypes.front());
+        sandbox->stepSimulation(0.01);
+    }
+
 /* Observing simulation.
  *  - Grain positions, grain linear and angular velocities.
  *  + use motion states to track positional changes.
