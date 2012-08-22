@@ -59,16 +59,12 @@ Sandbox : public btDiscreteDynamicsWorld {
           _collisionConfiguration(collisionConfiguration)
     {
 
-            // Create ground plane and walls.
-            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 1, 0), 0));
-            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(1, 0, 0), -2.5));
-            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(-1, 0, 0), 2.5));
-            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 0, 1), -2.5));
-            sandboxPlanes.push_back(new btStaticPlaneShape(btVector3(0, 0, -1), 2.5));
-            for (btStaticPlaneShape* i : sandboxPlanes)
-            {
-                staticBodies.push_back(createBody(i, 0));
-            }
+        // Create ground plane and walls.
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 1,  0),  0)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 1, 0,  0), -2.5)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3(-1, 0,  0),  2.5)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0,  1), -2.5)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0, -1),  2.5)));
     }
 
     btRigidBody*
@@ -97,10 +93,17 @@ Sandbox : public btDiscreteDynamicsWorld {
 
     virtual ~Sandbox()
     {
+        std::vector<btCollisionShape*> collisionShapes;
         for (btRigidBody* i : staticBodies)
+        {
+            collisionShapes.push_back(i->getCollisionShape());
             delete i;
-        for (btStaticPlaneShape* i : sandboxPlanes)
+        }
+
+        for (btCollisionShape* i : collisionShapes)
+        {
             delete i;
+        }
 
         delete _collisionConfiguration;
         delete _dispatcher;
@@ -123,7 +126,6 @@ Sandbox : public btDiscreteDynamicsWorld {
     btConstraintSolver* _solver;
     btCollisionConfiguration* _collisionConfiguration;
 
-    std::vector<btStaticPlaneShape*> sandboxPlanes;
     std::vector<btRigidBody*> staticBodies;
 };
 
