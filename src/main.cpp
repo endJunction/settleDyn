@@ -22,12 +22,19 @@
  * Author: Dmitrij Yu. Naumov
  */
 
+#include <iostream>
 #include <algorithm>
 #include <cstdlib>
 #include <string>
 
 #include "grains.h"
 #include "sandbox.h"
+
+std::ostream&
+operator<<(std::ostream& os, const btVector3& v)
+{
+    return os << "[" << v.x() << " " << v.y() << " " << v.z() << "]";
+}
 
 int
 main(int argc, char* argv[])
