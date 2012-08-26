@@ -104,8 +104,6 @@ Sandbox : public btDiscreteDynamicsWorld {
         }
 
         void* mem = btAlignedAlloc(sizeof(btRigidBody),16);
-        btRigidBody::btRigidBodyConstructionInfo rbci(
-                mass, 0, shape, localInertia);
         btRigidBody* body = new (mem)btRigidBody(
             btRigidBody::btRigidBodyConstructionInfo(
                 mass, 0, shape, localInertia));
