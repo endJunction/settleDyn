@@ -113,6 +113,7 @@ Sandbox : public btDiscreteDynamicsWorld {
         btTransform t;
         t.setIdentity();
         body->setWorldTransform(t);
+        this->addRigidBody(body);
         return body;
     }
 
