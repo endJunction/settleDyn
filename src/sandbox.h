@@ -23,6 +23,10 @@
 #define SETTLEDYN_SANDBOX_H
 
 
+#include <random>
+#include <vector>
+#include <time.h>
+
 #include <bullet/btBulletDynamicsCommon.h>
 #include <bullet/BulletMultiThreaded/PosixThreadSupport.h>
 #include <bullet/BulletMultiThreaded/PlatformDefinitions.h>
@@ -92,6 +96,21 @@ Sandbox : public btDiscreteDynamicsWorld {
         // constructSandbox.
     }
 
+    void
+    addGrain(btCollisionShape* prototype, const btScalar height = 100)
+    {
+        static std::mt19937 rng(time(NULL));
+        static std::uniform_real_distribution<float> rnd_transl(-1, 1);
+        static std::uniform_real_distribution<float> rnd_rot(0, 360);
+
+        btRigidBody* grain = createBody(prototype, 1);
+        grains.push_back(grain);
+
+        const btVector3 translation(rnd_transl(rng), height, rnd_transl(rng));
+        const btQuaternion rotation(rnd_rot(rng), rnd_rot(rng), rnd_rot(rng));
+        grain->setWorldTransform(btTransform(rotation, translation));
+    }
+
     private:
 
     btRigidBody*
@@ -132,6 +151,7 @@ Sandbox : public btDiscreteDynamicsWorld {
     btCollisionConfiguration* _collisionConfiguration;
 
     std::vector<btRigidBody*> staticBodies;
+    std::vector<btRigidBody*> grains;
 };
 
 Sandbox*
