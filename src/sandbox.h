@@ -65,6 +65,8 @@ Sandbox : public btDiscreteDynamicsWorld {
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3(-1, 0,  0), -2.5)));
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0,  1), -2.5)));
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0, -1), -2.5)));
+
+        this->setGravity(btVector3(0, -9.81, 0));
     }
 
     virtual ~Sandbox()
