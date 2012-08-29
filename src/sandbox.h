@@ -103,14 +103,16 @@ Sandbox : public btDiscreteDynamicsWorld {
             shape->calculateLocalInertia(mass,localInertia);
         }
 
+        btTransform startTransform;
+        startTransform.setIdentity();
+        startTransform.setOrigin(btVector3(0, 0, 0));
+
+        btDefaultMotionState* motionState = new btDefaultMotionState(startTransform);
         void* mem = btAlignedAlloc(sizeof(btRigidBody),16);
         btRigidBody* body = new (mem)btRigidBody(
             btRigidBody::btRigidBodyConstructionInfo(
-                mass, 0, shape, localInertia));
+                mass, motionState, shape, localInertia));
 
-        btTransform t;
-        t.setIdentity();
-        body->setWorldTransform(t);
         this->addRigidBody(body);
         return body;
     }
