@@ -134,14 +134,6 @@ Sandbox*
 constructSandbox(const float xySize)
 {
     //
-    // Posix threads.
-    //
-    PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(
-        "solver", SolverThreadFunc, SolverlsMemoryFunc, numThreads);
-    PosixThreadSupport* threadSupportSolver
-        = new PosixThreadSupport(solverConstructionInfo);
-
-    //
     // Collision configuration.
     //
     btDefaultCollisionConfiguration* collisionConfiguration
@@ -163,8 +155,17 @@ constructSandbox(const float xySize)
     //
     // Solver.
     //
-    btParallelConstraintSolver* solver
-        = new btParallelConstraintSolver(threadSupportSolver);
+    btSequentialImpulseConstraintSolver* solver
+        = new btSequentialImpulseConstraintSolver;
+    //
+    // Posix threads.
+    //
+    //PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(
+    //    "solver", SolverThreadFunc, SolverlsMemoryFunc, numThreads);
+    //PosixThreadSupport* threadSupportSolver
+    //    = new PosixThreadSupport(solverConstructionInfo);
+    //btParallelConstraintSolver* solver
+    //    = new btParallelConstraintSolver(threadSupportSolver);
 
 
     //
