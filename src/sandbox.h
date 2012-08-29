@@ -62,9 +62,9 @@ Sandbox : public btDiscreteDynamicsWorld {
         // Create ground plane and walls.
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 1,  0),  0)));
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 1, 0,  0), -2.5)));
-        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3(-1, 0,  0),  2.5)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3(-1, 0,  0), -2.5)));
         staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0,  1), -2.5)));
-        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0, -1),  2.5)));
+        staticBodies.push_back(createBody(new btStaticPlaneShape(btVector3( 0, 0, -1), -2.5)));
     }
 
     virtual ~Sandbox()
