@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/BulletDynamics/Dynamics/btRigidBody.h>
 
 namespace SettleDyn {
 
@@ -112,6 +113,68 @@ createPrototypes(const std::vector<std::string>& ps)
 
     return shapes;
 }
+
+//
+// Comparator and getter objects for grain's properties.
+//
+// Works as comparator if two parameters are given and as getter if one
+// parameter is given.
+//
+
+struct GrainsLinearVelocity
+{
+    typedef btScalar ReturnType;
+
+    bool
+    operator()(const btRigidBody* const a, const btRigidBody* const b) const
+    {
+        return a->getLinearVelocity().length()
+                < b->getLinearVelocity().length();
+    }
+
+    btScalar
+    operator()(const btRigidBody* const a) const
+    {
+        return a->getLinearVelocity().length();
+    }
+};
+
+struct GrainsAngularVelocity
+{
+    typedef btScalar ReturnType;
+
+    bool
+    operator()(const btRigidBody* const a, const btRigidBody* const b) const
+    {
+        return a->getAngularVelocity().length()
+                < b->getAngularVelocity().length();
+    }
+
+    btScalar
+    operator()(const btRigidBody* const a) const
+    {
+        return a->getAngularVelocity().length();
+    }
+};
+
+struct GrainsHeight
+{
+    typedef btScalar ReturnType;
+
+    bool
+    operator()(const btRigidBody* const a, const btRigidBody* const b) const
+    {
+        return a->getCenterOfMassPosition().y()
+                < b->getCenterOfMassPosition().y();
+    }
+
+    btScalar
+    operator()(const btRigidBody* const a) const
+    {
+        return a->getCenterOfMassPosition().y();
+    }
+};
+
 
 }   // namespace SettleDyn
 

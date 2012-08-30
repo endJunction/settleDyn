@@ -23,6 +23,7 @@
 #define SETTLEDYN_SANDBOX_H
 
 
+#include <algorithm>
 #include <random>
 #include <vector>
 #include <time.h>
@@ -96,6 +97,20 @@ Sandbox : public btDiscreteDynamicsWorld {
         // constructSandbox.
     }
 
+    template <typename F>
+    typename F::ReturnType
+    getGrainsMaximum(const F f)
+    {
+        typedef std::vector<btRigidBody*>::const_iterator CI;
+
+        CI g = std::max_element(grains.begin(), grains.end(), f);
+
+        if (g == grains.end())
+            return typename F::ReturnType();
+
+        return f(*g);
+    }
+
     void
     addGrain(btCollisionShape* prototype, const btScalar height = 100)
     {
@@ -111,6 +126,11 @@ Sandbox : public btDiscreteDynamicsWorld {
         grain->setWorldTransform(btTransform(rotation, translation));
     }
 
+    std::vector<btRigidBody*>
+    getGrains() const
+    {
+        return grains;
+    }
     private:
 
     btRigidBody*
