@@ -74,24 +74,39 @@ Sandbox : public btDiscreteDynamicsWorld {
         this->setGravity(btVector3(0, -9.81, 0));
     }
 
+    btCollisionShape*
+    removeRigidBodySaveShape(btRigidBody* body)
+    {
+        btCollisionShape* shape = body->getCollisionShape();
+        if (body->getMotionState())
+            delete body->getMotionState();
+
+        this->removeRigidBody(body);
+        delete body;
+        return shape;
+    }
+
     virtual ~Sandbox()
     {
-        std::vector<btCollisionShape*> collisionShapes;
+        // Do not remove collision shapes of the grains here, since the
+        // collision shapes are managed by prototypes vector.
+        std::vector<btCollisionShape*> shapes;
+        for (btRigidBody* i : grains)
+            removeRigidBodySaveShape(i);
+
         for (btRigidBody* i : staticBodies)
-        {
-            collisionShapes.push_back(i->getCollisionShape());
-            delete i;
-        }
+            shapes.push_back(removeRigidBodySaveShape(i));
 
-        for (btCollisionShape* i : collisionShapes)
-        {
+        // Sort and unique before deletion.
+        std::sort(shapes.begin(), shapes.end());
+        shapes.erase(std::unique(shapes.begin(), shapes.end()), shapes.end());
+        for (btCollisionShape* i : shapes)
             delete i;
-        }
 
-        delete _collisionConfiguration;
-        delete _dispatcher;
-        delete _broadphase;
         delete _solver;
+        delete _broadphase;
+        delete _dispatcher;
+        delete _collisionConfiguration;
 
         // To delete threadSupportSolver from solverConstructionInfo created in
         // constructSandbox.

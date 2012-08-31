@@ -89,6 +89,8 @@ main(int argc, char* argv[])
 
     delete sandbox;
 
+    // Delete collision shapes here, since maybe not all of the shapes were
+    // used in the simulation by rigid bodies.
     for (btCollisionShape* i : prototypes)
         delete i;
 
