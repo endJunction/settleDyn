@@ -22,6 +22,7 @@
 #ifndef SETTLEDYN_GRAINS_H
 #define SETTLEDYN_GRAINS_H
 
+#include <forward_list>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -112,6 +113,22 @@ createPrototypes(const std::vector<std::string>& ps)
     }
 
     return shapes;
+}
+
+// Grain's size is the second shortest edge length of the AABB.
+btScalar
+getSize(const btCollisionShape* const shape)
+{
+    btTransform tr;
+    tr.setIdentity();
+    btVector3 aabbMin,aabbMax;
+
+    shape->getAabb(tr,aabbMin,aabbMax);
+
+    const btVector3 edgeLengths = aabbMax-aabbMin;
+    std::forward_list<btScalar> e = { edgeLengths.x(), edgeLengths.y(), edgeLengths.z() };
+    e.sort();
+    return *(++e.cbegin());
 }
 
 //
