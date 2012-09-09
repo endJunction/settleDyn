@@ -112,18 +112,18 @@ Sandbox : public btDiscreteDynamicsWorld {
         // constructSandbox.
     }
 
+    // Run std::max_element using the F comparator and returns F(g) for a
+    // maximum element or F::ReturnType() if grains is empty.
     template <typename F>
     typename F::ReturnType
     getGrainsMaximum(const F f)
     {
-        typedef std::vector<btRigidBody*>::const_iterator CI;
-
-        CI g = std::max_element(grains.begin(), grains.end(), f);
-
-        if (g == grains.end())
+        if (grains.empty())
             return typename F::ReturnType();
 
-        return f(*g);
+        typedef std::vector<btRigidBody*>::const_iterator CI;
+
+        return f(*std::max_element(grains.begin(), grains.end(), f));
     }
 
     void
