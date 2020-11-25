@@ -32,6 +32,42 @@
 
 namespace SettleDyn {
 
+// Given a shape return a vector of shapes corresponding to a sample of the
+// implemented distribution. Assumes that shapes size is 1.
+class GrainDistribution
+{
+    public:
+    GrainDistribution() { std::cout << "OK"; };//const size_t samples)
+        //: _samples(samples) { };
+    virtual ~GrainDistribution() { };
+    virtual std::vector<btCollisionShape*>
+        getGrainsSample(btCollisionShape* shape) const = 0;
+
+    private:
+    //const size_t _samples;
+};
+
+// Samples are unused here.
+class UnivariateGrainSizeDistribution
+    : public GrainDistribution
+{
+    public:
+    UnivariateGrainSizeDistribution(const btScalar size, const size_t = 1)
+        : _size(size) { };
+
+    ~UnivariateGrainSizeDistribution() { };
+
+    std::vector<btCollisionShape*>
+    getGrainsSample(btCollisionShape* shape) const
+    {
+        std::vector<btCollisionShape*> shapes;
+        shapes.push_back(shape);
+        return shapes;
+    }
+
+    private:
+    const btScalar _size;
+};
 // Read .OFF file into triangle mesh. Only triangles are allowed in the surface
 // description.
 btTriangleMesh*
@@ -97,7 +133,8 @@ readOffFile(const std::string filename)
 }
 
 std::vector<btCollisionShape*>
-createPrototypes(const std::vector<std::string>& ps)
+createPrototypes(const std::vector<std::string>& ps,
+    const GrainDistribution* distribution)
 {
     // Create collision shapes from prototype descriptions. Simple shapes
     // are created according to the strings.
@@ -112,7 +149,20 @@ createPrototypes(const std::vector<std::string>& ps)
             shapes.push_back(new btSphereShape(0.5));
     }
 
-    return shapes;
+    // All prototypes in shapes are of size 1.
+    // Recreate other sizes as necessary for given grain size distribution.
+
+    std::vector<btCollisionShape*> prototypes;
+    for (btCollisionShape* s : shapes)
+    {
+        std::vector<btCollisionShape*> distributed_shapes
+            = distribution->getGrainsSample(s);
+        //std::copy(distributed_shapes.begin(), distributed_shapes.end(),
+            //prototypes.begin());
+        for (btCollisionShape* p : distributed_shapes)
+            prototypes.push_back(p);
+    }
+    return prototypes;
 }
 
 // Grain's size is the second shortest edge length of the AABB.

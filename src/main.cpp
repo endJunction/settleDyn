@@ -33,7 +33,7 @@
 std::ostream&
 operator<<(std::ostream& os, const btVector3& v)
 {
-    return os << "[" << v.x() << " " << v.y() << " " << v.z() << "]";
+    return os << "[ " << v.x() << " " << v.y() << " " << v.z() << " ]";
 }
 
 int
@@ -52,8 +52,9 @@ main(int argc, char* argv[])
     std::vector<std::string> prototype_descriptions;
     prototype_descriptions.push_back("CUBE");
 
+    const UnivariateGrainSizeDistribution distr(1);
     const std::vector<btCollisionShape*> prototypes
-        = createPrototypes(prototype_descriptions);
+        = createPrototypes(prototype_descriptions, &distr);
 
 /*
  * Init random generators
@@ -75,18 +76,37 @@ main(int argc, char* argv[])
  *  - Insert new grain at given position.
  */
 
-    for (size_t timeStep = 0; timeStep < 100000; timeStep++)
+    const btScalar dt(1./1000);
+    for (size_t timeStep = 0; timeStep < 1000; timeStep++)
     {
-        if (timeStep % 1000 == 0)
+        std::cout << timeStep << ", " << timeStep*dt << ": ";
+        sandbox->stepSimulation(dt, 0);
+
+        /* Observing simulation.
+         *  - Grain positions, grain linear and angular velocities.
+         *  + use motion states to track positional changes.
+         */
+        const std::vector<btRigidBody*> grains = sandbox->getGrains();
+        for (btRigidBody* g : grains)
+        {
+            //std::cout << "(" << g->getLinearVelocity() << ", "
+                //<< g->getAngularVelocity() << ", "
+                //<< g->getCenterOfMassPosition() << ") ";
+        }
+        //std::cout<< std::endl;
+
+        std::cout << sandbox->getGrainsMaximum(GrainsHeight()) << " ";
+        std::cout << sandbox->getGrainsMaximum(GrainsLinearVelocity()) << " ";
+        std::cout << sandbox->getGrainsMaximum(GrainsAngularVelocity()) << " ";
+        std::cout<< std::endl;
+
+        if (timeStep % 100 == 0)
+        {
+            std::cout << "New grain: " << getSize(prototypes.front()) << std::endl;
             sandbox->addGrain(prototypes.front());
-        sandbox->stepSimulation(0.01);
+        }
+
     }
-
-/* Observing simulation.
- *  - Grain positions, grain linear and angular velocities.
- *  + use motion states to track positional changes.
- */
-
     delete sandbox;
 
     // Delete collision shapes here, since maybe not all of the shapes were
